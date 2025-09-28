@@ -1,0 +1,6 @@
+hydra-core
+numpy
+scipy
+matplotlib
+scikit-learn
+pylimer-tools

@@ -1,0 +1,20 @@
+protocol_class:
+  - uniaxial
+  - uniaxial
+  - simple_shear
+# The number of list entries in protocol_class and protocol must match 
+protocol:
+  -
+    - 1.0
+    - 2.0
+    - 21.0
+  -
+    - 1.0
+    - 0.5
+    - 11.0
+  -
+    - 0.0
+    - 2.0
+    - 41.0
+# protocol_init: explicit or linspace
+protocol_init: linspace

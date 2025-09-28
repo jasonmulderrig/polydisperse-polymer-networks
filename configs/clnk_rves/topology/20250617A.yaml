@@ -1,0 +1,51 @@
+##### Chemistry-specific configuration parameters
+scheme: prhd
+p_n_dist: bimodal
+# w_c_args must comply with the specified chain_free_energy function
+# The top list level for w_c_args corresponds to a specific instantiation of w_c
+# The next list level contains a list of the float-valued arguments involved in w_c
+# If there are no values to report, then leave one empty entry that will be properly interpreted as list[None]
+w_c_dist: inext_gaussian_fjc
+w_c_args:
+  -
+    - 
+# w_c_dfrmtn_args must comply with the specified crosslink_deformation_chain_free_energy function
+w_c_dfrmtn_dist: log_barrier_clnk_vol_pnlty
+w_c_dfrmtn_args:
+  -
+    - 
+dim:
+  - 3
+b:
+  - 1.0
+rho_nu:
+  - 0.85
+f:
+  - 4
+en:
+  - 1000
+##### Processing-specific configuration parameters
+xi:
+  - 0.98
+chi:
+  - 1.0
+# p_n_args must comply with the specified chain_contour_length function
+# The top list level for p_n_args corresponds to a specific instantiation of p_n
+# The next list level contains two lists, p_n_p_args and p_n_n_args
+# p_n_p_args corresponds to a list of float-valued probability-related arguments involved in p_n
+# p_n_n_args corresponds to a list of integer-valued chain segment numbers involved in p_n
+# If there are no values to report in either p_n_p_args or p_n_n_args, then leave one empty entry that will be properly interpreted as list[None]
+p_n_args:
+  -
+    -
+      - 0.5
+    -
+      - 50
+      - 100
+# n must, in character, comply with the specified chain_contour_length function
+n:
+  -
+    - 50
+    - 100
+# n_init: explicit or linspace
+n_init: explicit

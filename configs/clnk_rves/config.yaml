@@ -1,0 +1,9 @@
+defaults:
+  - topology: 20250626B
+  - deformation: 20250626B
+  - _self_
+label:
+  workdir: clnk_rves
+  date: !!str 20250626
+  batch: B
+configs: 1

@@ -1,0 +1,23 @@
+##### Chemistry-specific configuration parameters
+# w_c_args must comply with the specified chain_free_energy function
+# The top list level for w_c_args corresponds to a specific instantiation of w_c
+# The next list level contains a list of the float-valued arguments involved in w_c
+# If there are no values to report, then leave one empty entry that will be properly interpreted as list[None]
+w_c_dist: inext_kuhn_grun_fjc
+w_c_args:
+  -
+    - 0.999
+# w_c_dfrmtn_args must comply with the specified crosslink_deformation_chain_free_energy function
+w_c_dfrmtn_dist: log_barrier_clnk_vol_pnlty
+w_c_dfrmtn_args:
+  -
+    - 
+b: 1.0
+n:
+  -
+    - 75
+    - 75
+    - 75
+    - 75
+# n_init: explicit or linspace
+n_init: explicit
