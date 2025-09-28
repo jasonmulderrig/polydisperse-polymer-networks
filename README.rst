@@ -37,7 +37,7 @@ Calculus- and linear algebra-based derivations that directly yield various funct
 
 An example ``master template`` Python file that analyzes polydisperse polymer networks with irregular cross-links can be found in the ``clnk_rves`` directory (``clnk_rves/clnk_rves.py``).
 
-Analysis of polydisperse polymer networks with irregular cross-links formed by inextensible Gaussian chains and inextensible Kuhn-Gr\"un chains respectively reside in the following directories:
+Analysis of polydisperse polymer networks with irregular cross-links formed by inextensible Gaussian chains and inextensible Kuhn-Gr\"{u}n chains respectively reside in the following directories:
 
 * ``polydisperse_inext_gaussian_fjc_networks_clnk_rves``
 * ``polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves``
