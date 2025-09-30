@@ -218,7 +218,7 @@ def clnk_rves_deformation(
                 # Evaluate the cross-link structure deformation
                 # Set the scope of the constrained minimization solver
                 cnstrnd_mnmztn_scope = "lcl" # "lcl", "glbl"
-                cnstrnd_mnmztn_method = "COBYQA" # "COBYLA", "COBYQA", "trust-constr", "differential-evolution", "shgo"
+                cnstrnd_mnmztn_method = "COBYLA" # "COBYLA", "COBYQA", "trust-constr", "differential-evolution", "shgo"
                 
                 # Free rotation constrained minimization
                 (omega_clnk_free_rot, _, y_clnk_free_rot, _, _, W_clnk_free_rot,
