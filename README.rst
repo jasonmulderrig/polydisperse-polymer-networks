@@ -47,7 +47,7 @@ Analysis of polydisperse polymer networks with irregular cross-links formed by i
 * ``polydisperse_inext_gaussian_fjc_networks_clnk_rves``
 * ``polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves``
 
-Analysis of polydisperse polymer networks with irregular cross-links formed by composite arbitrarily-inextensible freely jointed chains (c\\ *u*\\FJCs) reside in the ``polydisperse_cufjc_networks_clnk_rves`` directory. See the following manuscript which details the c\\ *u*\\FJC model: *Jason Mulderrig, Brandon Talamini, and Nikolaos Bouklas, A statistical mechanics framework for polymer chain scission, based on the concepts of distorted bond potential and asymptotic matching, `Journal of the Mechanics and Physics of Solids 174, 105244 (2023) <https://www.sciencedirect.com/science/article/pii/S0022509623000480>`_.*
+Analysis of polydisperse polymer networks with irregular cross-links formed by composite arbitrarily-inextensible freely jointed chains (cuFJCs) reside in the ``polydisperse_cufjc_networks_clnk_rves`` directory. See the following manuscript which details the cuFJC model: *Jason Mulderrig, Brandon Talamini, and Nikolaos Bouklas, A statistical mechanics framework for polymer chain scission, based on the concepts of distorted bond potential and asymptotic matching, `Journal of the Mechanics and Physics of Solids 174, 105244 (2023) `(DOI link) <https://doi.org/10.1016/j.jmps.2023.105244>`_*
 
 Analysis of bimodal PDMS polymer networks reside in the ``bimodal_pdms_networks`` directory, and mechanics data associated with these networks resides in the ``src/data`` source directory.
 
@@ -61,7 +61,7 @@ Parameter configuration settings for each of these analyses are stored in an app
 
 Each of these sub-directories contain a ``config.yaml`` YAML file defining a wide variety of parameter configuration settings. Moreover, each of these sub-directories contain two more sub-directories, ``topology`` and ``deformation``. Within each of these sub-directories are YAML files that define parameter configuration settings specifically related to network topology and deformation protocol(s), respectively. The Hydra package is employed to load in the settings from the YAML files.
 
-The ``irregular_topologies_i.sh`` Bash script analyzes the mechanics of various polydisperse polymer networks with irregular cross-links formed by inextensible Gaussian chains and inextensible Kuhn-Gr\"un chains under uniaxial and simple shear deformation. This analysis renders some of the data and results used in the ``Polydisperse polymer networks with irregular topologies I`` manuscript. Running this Bash script on my 2022 MacBook Air with an Apple M2 chip and 8 GM RAM took approximately 10 hours to complete (i.e., overnight).
+The ``irregular_topologies_i.sh`` Bash script analyzes the mechanics of various polydisperse polymer networks with irregular cross-links formed by inextensible Gaussian chains and inextensible Kuhn-Grün chains under uniaxial and simple shear deformation. This analysis renders some of the data and results used in the ``Polydisperse polymer networks with irregular topologies I`` manuscript. Running this Bash script on my 2022 MacBook Air with an Apple M2 chip and 8 GM RAM took approximately 10 hours to complete (i.e., overnight).
 
 *****
 Usage
