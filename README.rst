@@ -47,7 +47,7 @@ Analysis of polydisperse polymer networks with irregular cross-links formed by i
 * ``polydisperse_inext_gaussian_fjc_networks_clnk_rves``
 * ``polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves``
 
-Analysis of polydisperse polymer networks with irregular cross-links formed by composite arbitrarily-inextensible freely jointed chains (cuFJCs) reside in the ``polydisperse_cufjc_networks_clnk_rves`` directory. See the following manuscript which details the cuFJC model: *\Jason Mulderrig, Brandon Talamini, and Nikolaos Bouklas, A statistical mechanics framework for polymer chain scission, based on the concepts of distorted bond potential and asymptotic matching, `Journal of the Mechanics and Physics of Solids 174, 105244 (2023) <https://www.sciencedirect.com/science/article/pii/S0022509623000480>`_.*
+Analysis of polydisperse polymer networks with irregular cross-links formed by composite arbitrarily-inextensible freely jointed chains (cuFJCs) reside in the ``polydisperse_cufjc_networks_clnk_rves`` directory. See the following manuscript which details the cuFJC model: \Jason Mulderrig, Brandon Talamini, and Nikolaos Bouklas, A statistical mechanics framework for polymer chain scission, based on the concepts of distorted bond potential and asymptotic matching, `Journal of the Mechanics and Physics of Solids 174, 105244 (2023) <https://www.sciencedirect.com/science/article/pii/S0022509623000480>`_.
 
 Analysis of bimodal PDMS polymer networks reside in the ``bimodal_pdms_networks`` directory, and mechanics data associated with these networks resides in the ``src/data`` source directory.
 
