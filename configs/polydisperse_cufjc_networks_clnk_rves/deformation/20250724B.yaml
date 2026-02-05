@@ -1,0 +1,15 @@
+protocol_class:
+  - uniaxial
+  - uniaxial
+# The number of list entries in protocol_class and protocol must match 
+protocol:
+  -
+    - 1.0
+    - 3.75
+    - 276.0
+  -
+    - 1.0
+    - 0.5
+    - 51.0
+# protocol_init: explicit or linspace
+protocol_init: linspace

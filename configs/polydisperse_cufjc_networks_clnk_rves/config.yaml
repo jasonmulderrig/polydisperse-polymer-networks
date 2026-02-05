@@ -1,0 +1,9 @@
+defaults:
+  - topology: 20251206A
+  - deformation: 20251206A
+  - _self_
+label:
+  workdir: polydisperse_cufjc_networks_clnk_rves
+  date: !!str 20251206
+  batch: A
+  sample: 0

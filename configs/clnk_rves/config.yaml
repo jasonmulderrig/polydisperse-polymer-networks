@@ -1,9 +1,9 @@
 defaults:
-  - topology: 20250626B
-  - deformation: 20250626B
+  - topology: 20260204B
+  - deformation: 20260204B
   - _self_
 label:
   workdir: clnk_rves
-  date: !!str 20250626
+  date: !!str 20260204
   batch: B
-configs: 1
+  sample: 0

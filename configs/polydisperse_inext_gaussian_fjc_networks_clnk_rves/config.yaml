@@ -1,9 +1,9 @@
 defaults:
-  - topology: 20250724A
-  - deformation: 20250724A
+  - topology: 20251206A
+  - deformation: 20251206A
   - _self_
 label:
   workdir: polydisperse_inext_gaussian_fjc_networks_clnk_rves
-  date: !!str 20250724
+  date: !!str 20251206
   batch: A
-configs: 1
+  sample: 0

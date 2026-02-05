@@ -4,7 +4,7 @@ protocol_class:
 protocol:
   -
     - 1.0
-    - 1.05
-    - 2.0
+    - 1.15
+    - 4.0
 # protocol_init: explicit or linspace
 protocol_init: linspace

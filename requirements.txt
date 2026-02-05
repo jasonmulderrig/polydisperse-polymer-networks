@@ -3,4 +3,6 @@ numpy
 scipy
 matplotlib
 scikit-learn
+networkx
 pylimer-tools
+pint

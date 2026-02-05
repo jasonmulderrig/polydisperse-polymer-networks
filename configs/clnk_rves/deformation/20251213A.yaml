@@ -1,0 +1,17 @@
+protocol_class:
+  - uniaxial
+protocol:
+  -
+    - 1.0
+    - 1.15
+    - 4.0
+protocol_init: linspace
+seed: 42
+num_quad_points: 1001
+gamma_n_hat_inc: 0.0001
+sph_quad_method: bazant_oh_009
+num_spin_inc: 5
+vol_clnk_side_dim_points: 10
+eval_W_flucts: True
+cnstrnd_mnmztn_scope: glbl # lcl or glbl
+cnstrnd_mnmztn_method: shgo # COBYLA, COBYQA, trust-constr, differential-evolution, or shgo

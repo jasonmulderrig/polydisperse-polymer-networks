@@ -1,0 +1,21 @@
+protocol_class:
+  - uniaxial
+  - uniaxial
+protocol:
+  -
+    - 1.0
+    - 5.50
+    - 451.0
+  -
+    - 1.0
+    - 0.5
+    - 51.0
+protocol_init: linspace
+seed: 42
+num_quad_points: 1001
+gamma_n_hat_inc: 0.0001
+sph_quad_method: bazant_oh_009
+num_spin_inc: 8
+eval_W_clnk_chns: True
+eval_W_clnk_y_flucts: False
+use_inext_gaussian_fjc_delta_clnk: False

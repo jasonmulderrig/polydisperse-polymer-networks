@@ -24,6 +24,6 @@ fi
 source bin/activate
 
 pip3 install wheel && pip3 install --upgrade setuptools && pip3 install --upgrade pip
-pip3 install hydra-core numpy scipy matplotlib scikit-learn pylimer-tools
+pip3 install hydra-core numpy scipy matplotlib scikit-learn networkx pylimer-tools pint
 
 deactivate

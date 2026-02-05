@@ -1,5 +1,5 @@
 import numpy as np
-from src.helpers.network_topology_initialization_utils import (
+from src.helpers.simulation_box import (
     tessellation_protocol,
     tessellation
 )

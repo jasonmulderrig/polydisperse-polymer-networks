@@ -1,9 +1,9 @@
 defaults:
-  - topology: 20250724E
-  - deformation: 20250724E
+  - topology: 20251206A
+  - deformation: 20251206A
   - _self_
 label:
   workdir: polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves
-  date: !!str 20250724
-  batch: E
-configs: 1
+  date: !!str 20251206
+  batch: A
+  sample: 0

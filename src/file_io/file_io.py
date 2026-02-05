@@ -1,6 +1,17 @@
 import os
 import pathlib
 
+def data_filepath_str() -> str:
+    # For MacOS
+    data_filepath = f"/Users/jasonmulderrig/research/projects/polydisperse-polymer-networks/src/data/"
+    # For Windows OS
+    # data_filepath = f"C:\\Users\\mulderjp\\projects\\polydisperse-polymer-networks\\src\\data\\"
+    # For Linux
+    # data_filepath = f"/p/home/jpm2225/projects/polydisperse-polymer-networks/src/data/"
+    if os.path.isdir(data_filepath) == False:
+        pathlib.Path(data_filepath).mkdir(parents=True, exist_ok=True)
+    return data_filepath
+
 def spherical_quadrature_filepath_str() -> str:
     # For MacOS
     sph_quad_filepath = f"/Users/jasonmulderrig/research/projects/polydisperse-polymer-networks/src/spherical_quadrature/"

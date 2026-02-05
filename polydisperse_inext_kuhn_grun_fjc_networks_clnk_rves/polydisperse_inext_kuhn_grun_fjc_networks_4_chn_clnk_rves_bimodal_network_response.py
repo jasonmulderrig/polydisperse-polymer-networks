@@ -12,30 +12,38 @@ import hydra
 from omegaconf import DictConfig
 import numpy as np
 from src.file_io.file_io import filename_str
-from src.helpers.so3_quadrature_utils import master_so3_quadrature_func
-from src.helpers.chain_free_energy_utils import (
+from src.helpers.so3_quadrature import master_so3_quadrature_func
+from src.helpers.chain_free_energy import (
     master_w_c_func,
-    master_w_c_dfrmtn_func
+    master_w_c_args_func,
+    master_w_c_dfrmtn_func,
+    master_w_c_dfrmtn_args_func,
+    master_dw_c__dy_clnk_func,
+    master_dw_c__dy_clnk_args_func,
+    master_d2w_c__dy_clnk_dy_clnk_func,
+    master_d2w_c__dy_clnk_dy_clnk_args_func
 )
-from src.helpers.chain_segment_number_utils import n_init_func
-from src.helpers.chain_segment_number_dispersity_utils import (
+from src.helpers.chain_segment_number import n_init_func
+from src.helpers.chain_segment_number_dispersity import (
     master_p_n_func,
     p_n_init_func
 )
-from src.helpers.clnk_degree_dispersity_utils import k_init_func
-from src.helpers.clnk_structure_dispersity_utils import (
-    m_clnks_init_func,
-    n_clnks_init_func,
-    C_clnks_init_func,
-    p_n_k_clnks_init_func
+from src.helpers.clnk_structure_dispersity import (
+    m_clnks_symmetric_under_chain_permutation_func,
+    n_clnks_symmetric_under_chain_permutation_func,
+    C_clnks_symmetric_under_chain_permutation_func,
+    p_n_k_clnks_symmetric_under_chain_permutation_func
 )
-from src.helpers.chain_length_utils import (
-    master_r_crit_func,
-    master_r_rms_func
+from src.helpers.chain_stretch import (
+    master_gamma_crits_func,
+    master_gamma_crit_func,
+    master_gamma_rms_args_func,
+    master_gamma_rms_func,
+    gamma_func
 )
-from src.helpers.clnk_structure_utils import (
+from src.helpers.chain_length import r_func
+from src.helpers.clnk_structure import (
     recommended_clnk_init_func,
-    vol_quad_clnk_func,
     amended_3_chn_clnk_X_hat_clnk_func,
     regular_tetrahedral_4_chn_clnk_X_hat_clnk_func,
     equilateral_triangular_bipyramidal_5_chn_clnk_X_hat_clnk_func,
@@ -45,109 +53,103 @@ from src.helpers.clnk_structure_utils import (
     x_hat_clnk_func,
     com_x_clnk_func
 )
-from src.helpers.chain_conformation_utils import gamma_func
-from src.helpers.continuum_mechanics_utils import (
+from src.helpers.continuum_mechanics import (
     deformation_protocol_init_func,
     F_func
 )
-from src.helpers.clnk_free_rotation_utils import (
+from src.helpers.clnk_free_rotation import (
     clnk_free_rot_approx,
     monodisperse_clnk_free_rot
 )
-from src.helpers.clnk_frame_averaging_utils import (
+from src.helpers.clnk_frame_averaging import (
     clnk_frame_avrg_approx,
     monodisperse_clnk_frame_avrg
 )
 
-def clnk_rves_deformation(
-        label: DictConfig,
-        sample: int,
-        deformation: DictConfig,
-        p_n_dist: str,
-        w_c_dist: str,
-        w_c_args: list,
-        w_c_dfrmtn_dist: str,
-        w_c_dfrmtn_args: list,
-        b: float,
-        f: int,
-        p_n_args: list,
-        n: list,
-        n_init: str) -> None:
+##### This code corresponds to the 20251204D.yaml, 20251204E.yaml, and
+##### 20251204F.yaml configuration files. Make sure to set the
+##### deformation and topology configuration files to 20251204D.yaml,
+##### 20251204E.yaml, or 20251204F.yaml in the config.yaml file before
+##### running.
+@hydra.main(
+        version_base=None,
+        config_path="../configs/polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves",
+        config_name="config")
+def main(cfg: DictConfig) -> None:
     # Generate filename prefix
     filename_prefix = filename_str(
-        label.workdir, label.date, label.batch, sample)
+        cfg.label.workdir, cfg.label.date, cfg.label.batch, cfg.label.sample)
     
     # Create a seeded default random number generator for the
     # differential evolution global constrained minimization
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng(cfg.deformation.seed)
 
     # Numerical quadrature scheme
-    points, weights = np.polynomial.legendre.leggauss(1001)
+    points, weights = np.polynomial.legendre.leggauss(
+        cfg.deformation.num_quad_points)
 
     # SO3 quadrature scheme
-    so3_quad, sph_quad_symmtry = master_so3_quadrature_func("bazant_oh_013", 16)
+    so3_quad, sph_quad_symmtry = master_so3_quadrature_func(
+        cfg.deformation.sph_quad_method, cfg.deformation.num_spin_inc)
     so3_quad_num = np.shape(so3_quad)[0]
-
-    # Convex hull quadrature scheme
-    vol_clnk_side_dim_points = 10 # 15
-
-    # Evaluate W_flucts
-    eval_W_flucts = False
     
-    # Extract arguments for the polymer chain segment number probability
-    # distribution, and convert lists to tuples
-    n = tuple(n)
+    # Gather all possible types of critical/fundamental
+    # absolute/equilibrium chain stretches
+    gamma_crits = master_gamma_crits_func(
+        cfg.topology.w_c_dist, cfg.topology.kappa_n, cfg.topology.zeta_n_char)
+    
+    # Extract nondimensional polymer chain free energy function,
+    # nondimensional polymer chain deformation free energy function,
+    # nondimensional derivative of the polymer chain free energy with
+    # respect to the cross-link junction position function, and
+    # nondimensional second derivative of the polymer chain free energy
+    # with respect to the cross-link junction position function
+    w_c_func = master_w_c_func(cfg.topology.w_c_dist)
+    w_c_args = master_w_c_args_func(
+        cfg.topology.w_c_dist, cfg.topology.kappa_n, cfg.topology.zeta_n_char,
+        gamma_crits)
+    w_c_dfrmtn_func = master_w_c_dfrmtn_func(cfg.topology.w_c_dfrmtn_dist)
+    w_c_dfrmtn_args = master_w_c_dfrmtn_args_func(cfg.topology.w_c_dfrmtn_dist)
+    dw_c__dy_clnk_func = master_dw_c__dy_clnk_func(cfg.topology.w_c_dist)
+    dw_c__dy_clnk_args = master_dw_c__dy_clnk_args_func(
+        cfg.topology.w_c_dist, cfg.topology.kappa_n, cfg.topology.zeta_n_char,
+        gamma_crits)
+    d2w_c__dy_clnk_dy_clnk_func = master_d2w_c__dy_clnk_dy_clnk_func(
+        cfg.topology.w_c_dist)
+    d2w_c__dy_clnk_dy_clnk_args = master_d2w_c__dy_clnk_dy_clnk_args_func(
+        cfg.topology.w_c_dist, cfg.topology.kappa_n, cfg.topology.zeta_n_char,
+        gamma_crits)
 
     # Acquire the specified polymer chain segment number probability
     # distribution function
-    p_n_func = master_p_n_func(p_n_dist)
+    p_n_func = master_p_n_func(cfg.topology.p_n_dist)
 
-    # Extract arguments for the polymer chain free energy function
-    w_c_args = [] if w_c_args == [None] else w_c_args
-    w_c_args = tuple(w_c_args)
-
-    # Extract polymer chain free energy function
-    w_c_func = master_w_c_func(w_c_dist)
-
-    # Extract arguments for the cross-link deformation polymer chain
-    # free energy function
-    w_c_dfrmtn_args = [] if w_c_dfrmtn_args == [None] else w_c_dfrmtn_args
-    w_c_dfrmtn_args = tuple(w_c_dfrmtn_args)
-
-    # Extract cross-link deformation polymer chain free energy function
-    w_c_dfrmtn_func = master_w_c_dfrmtn_func(w_c_dfrmtn_dist)
-
-    # Initialize the salient chain segment numbers, the
-    # elastically-effective cross-link degree, the chain segment number
-    # multiplicity for each distinct cross-link structure, the chain
-    # segment number for each chain in each distinct cross-link
+    # Initialize the salient chain segment numbers, the chain segment
+    # number multiplicity for each distinct cross-link structure, the
+    # chain segment number for each chain in each distinct cross-link
     # structure, and the number of permutations that exist for each
     # distinct cross-link structure (due to symmetry equivalence)
-    n, N = n_init_func(n_init, n)
-    k = k_init_func(f)
-    m_clnks = m_clnks_init_func(k, N)
-    n_clnks = n_clnks_init_func(n, m_clnks)
-    C_clnks = C_clnks_init_func(m_clnks)
-
-    # Downselect tetrafunctional cross-links
-    k_4_indx = np.where(k==4)[0][0]
-    m_clnks = m_clnks[k_4_indx]
-    n_clnks = n_clnks[k_4_indx]
-    C_clnks = C_clnks[k_4_indx]
+    n, N = n_init_func(cfg.topology.n_init, tuple(cfg.topology.n[0]), int)
+    m_clnks = m_clnks_symmetric_under_chain_permutation_func(cfg.topology.f, N)
+    n_clnks = n_clnks_symmetric_under_chain_permutation_func(n, m_clnks)
+    C_clnks = C_clnks_symmetric_under_chain_permutation_func(m_clnks)
 
     # Initialize the probability distribution of distinct cross-link
     # structures (with symmetry equivalence)
-    p = np.empty(len(p_n_args))
-    p_clnks = np.empty((len(p_n_args), np.shape(n_clnks)[0]))
-    for p_n_args_indx in range(len(p_n_args)):
-        p[p_n_args_indx] = p_n_args[p_n_args_indx][0][0]
-        p_n_p_args = tuple(p_n_args[p_n_args_indx][0])
-        p_n_n_args = tuple(p_n_args[p_n_args_indx][1])
-        p_n = p_n_init_func(n, p_n_dist, p_n_func, p_n_p_args, p_n_n_args)
+    num_p_n_args = len(cfg.topology.p_n_args)
+    p = np.empty(num_p_n_args)
+    p_clnks = np.empty((num_p_n_args, np.shape(n_clnks)[0]))
+    for p_n_args_indx in range(num_p_n_args):
+        p[p_n_args_indx] = cfg.topology.p_n_args[p_n_args_indx][0][0]
+        p_n_p_args = tuple(cfg.topology.p_n_args[p_n_args_indx][0])
+        p_n_n_args = tuple(cfg.topology.p_n_args[p_n_args_indx][1])
+        p_n = p_n_init_func(
+            n, cfg.topology.p_n_dist, p_n_func, p_n_p_args, p_n_n_args)
         p_n /= np.sum(p_n, dtype=float)
 
         p_clnks[p_n_args_indx] = (
-            p_n_k_clnks_init_func([C_clnks], p_n, [m_clnks])[0]
+            p_n_k_clnks_symmetric_under_chain_permutation_func(
+                C_clnks, p_n, m_clnks)
         )
 
     # Save the salient chain segment numbers and probability
@@ -160,49 +162,58 @@ def clnk_rves_deformation(
     np.savetxt(p_filename, p)
     np.savetxt(p_clnks_filename, p_clnks)
 
+    # Calculate the critical absolute/equilibrium polymer chain stretch
+    # on a chain-by-chain basis
+    gamma_crit_clnks = np.empty_like(n_clnks, dtype=float)
+    for chn_indx in np.ndindex(np.shape(n_clnks)):
+        gamma_crit_clnks[chn_indx] = master_gamma_crit_func(
+            cfg.topology.w_c_dist, cfg.topology.kappa_n,
+            cfg.topology.zeta_n_char)
+    
     # Calculate the critical polymer chain contour length on a
     # chain-by-chain basis
     r_crit_clnks = np.empty_like(n_clnks, dtype=float)
-    for clnk_indx in np.ndindex(np.shape(n_clnks)):
-        r_crit_clnks[clnk_indx] = master_r_crit_func(
-            n_clnks[clnk_indx], b, w_c_dist, w_c_args)
+    for chn_indx in np.ndindex(np.shape(n_clnks)):
+        r_crit_clnks[chn_indx] = r_func(
+            gamma_crit_clnks[chn_indx], n_clnks[chn_indx], cfg.topology.b)
+    
+    # Calculate the root-mean-square absolute/equilibrium polymer chain
+    # stretch on a chain-by-chain basis
+    gamma_rms_args = master_gamma_rms_args_func(
+        cfg.topology.w_c_dist, cfg.topology.kappa_n, cfg.topology.zeta_n_char,
+        gamma_crits)
+    gamma_rms_clnks = np.empty_like(n_clnks, dtype=float)
+    for chn_indx in np.ndindex(np.shape(n_clnks)):
+        gamma_rms_clnks[chn_indx] = master_gamma_rms_func(
+            points, weights, n_clnks[chn_indx], gamma_crit_clnks[chn_indx],
+            cfg.deformation.gamma_n_hat_inc, cfg.topology.w_c_dist, w_c_func,
+            w_c_args, gamma_rms_args)
     
     # Calculate the root-mean-square polymer chain length on a
     # chain-by-chain basis
     r_rms_clnks = np.empty_like(n_clnks, dtype=float)
-    for clnk_indx in np.ndindex(np.shape(n_clnks)):
-        r_rms_clnks[clnk_indx] = master_r_rms_func(
-            points, weights, r_crit_clnks[clnk_indx], n_clnks[clnk_indx], b,
-            w_c_dist, w_c_func, w_c_args)
+    for chn_indx in np.ndindex(np.shape(n_clnks)):
+        r_rms_clnks[chn_indx] = r_func(
+            gamma_rms_clnks[chn_indx], n_clnks[chn_indx], cfg.topology.b)
 
     # Initialize the cross-link structures
     clnks_num, k_num = np.shape(n_clnks)
     X_clnks = np.zeros((clnks_num, k_num, 3))
-    X_l_clnk, _, _  = recommended_clnk_init_func(
-        n_clnks[0]*b, type_8_chn_clnk="cube")
-    vol_quad_clnk = vol_quad_clnk_func(X_l_clnk, vol_clnk_side_dim_points)
-    vol_quad_clnk_shape = np.shape(vol_quad_clnk)
-    vol_quad_clnks = np.zeros(
-        (clnks_num, vol_quad_clnk_shape[0], vol_quad_clnk_shape[1]))
     omega_clnks_init = np.zeros((clnks_num, 3))
     y_clnks_init = np.zeros((clnks_num, 3))
     gamma_clnks_init = np.zeros((clnks_num, k_num))
     for clnk_indx in range(clnks_num):
         n_clnk = n_clnks[clnk_indx]
         X_clnk, omega_clnk_init, y_clnk_init = recommended_clnk_init_func(
-            r_rms_clnks[clnk_indx], type_8_chn_clnk="cube")
-        X_l_clnk, _, _ = recommended_clnk_init_func(
-            n_clnk*b, type_8_chn_clnk="cube")
-        vol_quad_clnk = vol_quad_clnk_func(
-            X_l_clnk, vol_clnk_side_dim_points)
+            r_rms_clnks[clnk_indx], type_8_chn_clnk=cfg.topology.type_8_chn_clnk)
         X_clnks[clnk_indx] = X_clnk
-        vol_quad_clnks[clnk_indx] = vol_quad_clnk
         omega_clnks_init[clnk_indx] = omega_clnk_init
         y_clnks_init[clnk_indx] = y_clnk_init
         r_clnk_init = X_clnk - y_clnk_init
         for chn_indx in range(k_num):
             gamma_clnks_init[clnk_indx, chn_indx] = gamma_func(
-                np.linalg.norm(r_clnk_init[chn_indx]), n_clnk[chn_indx], b)
+                np.linalg.norm(r_clnk_init[chn_indx]),
+                n_clnk[chn_indx], cfg.topology.b)
     
     # Verify that all initial cross-link positions coincide with the origin
     for clnk_indx in range(np.shape(y_clnks_init)[0]):
@@ -230,13 +241,13 @@ def clnk_rves_deformation(
     cube_8_chn_clnk_X_hat_clnk = cube_8_chn_clnk_X_hat_clnk_func()
 
     # Deformation protocol initialization
-    dfrmtn_protocol_class = deformation.protocol_class
+    dfrmtn_protocol_class = cfg.deformation.protocol_class
     dfrmtn_protocol = []
     for protocol_indx in range(len(dfrmtn_protocol_class)):
         dfrmtn_protocol.append(
             deformation_protocol_init_func(
-                deformation.protocol_init,
-                deformation.protocol[protocol_indx]))
+                cfg.deformation.protocol_init,
+                cfg.deformation.protocol[protocol_indx]))
 
     # Data initialization
     gamma_clnks_free_rot_approx = []
@@ -277,12 +288,12 @@ def clnk_rves_deformation(
                 X_clnk = X_clnks[clnk_indx]
                 X_hat_clnk = x_hat_clnk_func(X_clnk)
                 com_X_hat_clnk = com_x_clnk_func(X_hat_clnk)
-                vol_quad_clnk = vol_quad_clnks[clnk_indx]
                 y_clnk_init = y_clnks_init[clnk_indx]
                 gamma_clnk_init = gamma_clnks_init[clnk_indx]
                 
                 # Evaluate the cross-link structure deformation
-                if (np.all(np.equal(n_clnk, n_clnk[0])) and
+                if (np.allclose(n_clnk, n_clnk[0]*np.ones_like(n_clnk)) and
+                    np.allclose(gamma_clnk_init, gamma_clnk_init[0]*np.ones_like(gamma_clnk_init)) and
                     np.allclose(com_X_hat_clnk, np.zeros(3)) and
                     np.allclose(y_clnk_init, np.zeros(3))):
                     
@@ -301,12 +312,15 @@ def clnk_rves_deformation(
                         monodisperse_clnk = np.allclose(
                             X_hat_clnk, cube_8_chn_clnk_X_hat_clnk)
                     if monodisperse_clnk:
-                        _, _, _, gamma_clnk_star, W_clnk_star, _ = (
+                        _, _, _, gamma_clnk_star, _, _, W_clnk_star = (
                             monodisperse_clnk_free_rot(
-                                eval_W_flucts, F, Lmbda, n_clnk, b, X_clnk,
-                                vol_quad_clnk, y_clnk_init, gamma_clnk_init,
-                                w_c_func, w_c_args,
-                                w_c_dfrmtn_func, w_c_dfrmtn_args)
+                                cfg.deformation.eval_W_clnk_chns,
+                                cfg.deformation.eval_W_clnk_y_flucts, F, Lmbda,
+                                n_clnk, cfg.topology.b, X_clnk, y_clnk_init,
+                                gamma_clnk_init, w_c_func, w_c_args,
+                                w_c_dfrmtn_func, w_c_dfrmtn_args,
+                                d2w_c__dy_clnk_dy_clnk_func,
+                                d2w_c__dy_clnk_dy_clnk_args)
                         )
 
                         gamma_clnks_free_rot_approx[protocol_indx][dfrmtn_step, clnk_indx] = (
@@ -342,13 +356,17 @@ def clnk_rves_deformation(
                         monodisperse_clnk = np.allclose(
                             X_hat_clnk, cube_8_chn_clnk_X_hat_clnk)
                     if monodisperse_clnk:
-                        (_, _, gamma_clnk_star_frame_avrg_so3, _, _, _, _,
-                         W_clnk_star_frame_avrg_so3_quad) = (
+                        (_, _, gamma_clnk_star_frame_avrg_so3, _, _, _, _, _, _,
+                         _, _, W_clnk_star_frame_avrg_so3_quad) = (
                             monodisperse_clnk_frame_avrg(
-                                F, n_clnk, b, X_clnk, so3_quad,
+                                cfg.deformation.eval_W_clnk_chns,
+                                cfg.deformation.eval_W_clnk_y_flucts, F, n_clnk,
+                                cfg.topology.b, X_clnk, so3_quad,
                                 sph_quad_symmtry, y_clnk_init,
                                 w_c_func, w_c_args,
-                                w_c_dfrmtn_func, w_c_dfrmtn_args)
+                                w_c_dfrmtn_func, w_c_dfrmtn_args,
+                                d2w_c__dy_clnk_dy_clnk_func,
+                                d2w_c__dy_clnk_dy_clnk_args)
                         )
 
                         gamma_clnks_frame_avrg_approx_so3[protocol_indx][dfrmtn_step, clnk_indx] = (
@@ -358,21 +376,23 @@ def clnk_rves_deformation(
                             W_clnk_star_frame_avrg_so3_quad
                         )
                 
-                elif not np.all(np.equal(n_clnk, n_clnk[0])):
+                elif not np.allclose(n_clnk, n_clnk[0]*np.ones_like(n_clnk)):
                     # Free rotation approximation
                     clnk_approx = False
                     if k_num == 4:
                         clnk_approx = np.allclose(
                             X_hat_clnk,
                             regular_tetrahedral_4_chn_clnk_X_hat_clnk)
-                    elif k_num == 8:
-                        clnk_approx = np.allclose(
-                            X_hat_clnk, cube_8_chn_clnk_X_hat_clnk)
                     if clnk_approx:
-                        (_, _, _, _, _, gamma_clnk_free_rot_approx,
-                         W_clnk_free_rot_approx, _) = clnk_free_rot_approx(
-                            eval_W_flucts, F, n_clnk, b, X_clnk, vol_quad_clnk,
-                            w_c_func, w_c_args, w_c_dfrmtn_func, w_c_dfrmtn_args)
+                        (_, _, _, _, _, gamma_clnk_free_rot_approx, _, _,
+                         W_clnk_free_rot_approx) = clnk_free_rot_approx(
+                            cfg.deformation.eval_W_clnk_chns,
+                            cfg.deformation.eval_W_clnk_y_flucts,
+                            cfg.deformation.use_inext_gaussian_fjc_delta_clnk,
+                            F, n_clnk, cfg.topology.b, X_clnk,
+                            w_c_func, w_c_args, w_c_dfrmtn_func, w_c_dfrmtn_args,
+                            d2w_c__dy_clnk_dy_clnk_func,
+                            d2w_c__dy_clnk_dy_clnk_args)
                         
                         gamma_clnks_free_rot_approx[protocol_indx][dfrmtn_step, clnk_indx] = (
                             gamma_clnk_free_rot_approx
@@ -383,12 +403,18 @@ def clnk_rves_deformation(
                     
                     # Frame averaging approximation
                     if np.allclose(com_X_hat_clnk, np.zeros(3)):
-                        (_, _, gamma_clnk_frame_avrg_approx_so3, _, _, _, _,
-                         W_clnk_frame_avrg_approx_so3_quad) = (
+                        (_, _, gamma_clnk_frame_avrg_approx_so3, _, _, _, _, _,
+                         _, _, _, W_clnk_frame_avrg_approx_so3_quad) = (
                             clnk_frame_avrg_approx(
-                                F, n_clnk, b, X_clnk, so3_quad,
+                                cfg.deformation.eval_W_clnk_chns,
+                                cfg.deformation.eval_W_clnk_y_flucts,
+                                cfg.deformation.use_inext_gaussian_fjc_delta_clnk,
+                                F, n_clnk, cfg.topology.b, X_clnk, so3_quad,
                                 sph_quad_symmtry, w_c_func, w_c_args,
-                                w_c_dfrmtn_func, w_c_dfrmtn_args)
+                                w_c_dfrmtn_func, w_c_dfrmtn_args,
+                                dw_c__dy_clnk_func, dw_c__dy_clnk_args,
+                                d2w_c__dy_clnk_dy_clnk_func,
+                                d2w_c__dy_clnk_dy_clnk_args)
                         )
 
                         gamma_clnks_frame_avrg_approx_so3[protocol_indx][dfrmtn_step, clnk_indx] = (
@@ -410,7 +436,7 @@ def clnk_rves_deformation(
     
     # Generate filenames and save data
     for protocol_indx in range(len(dfrmtn_protocol)):
-        protocol_indx_str = "protocol_indx_" + str(protocol_indx)
+        protocol_indx_str = f"protocol_indx_{protocol_indx:d}"
         dfrmtn_filename = (
             filename_prefix + "-dfrmtn" + "_" + protocol_indx_str + ".npy"
         )
@@ -431,30 +457,6 @@ def clnk_rves_deformation(
         np.save(
             W_clnks_frame_avrg_approx_so3_quad_filename,
             W_clnks_frame_avrg_approx_so3_quad[protocol_indx])
-
-##### This code corresponds to the 20250724D.yaml and 20250724E.yaml
-##### configuration files. Make sure to set the deformation and topology
-##### configuration files to 20250724D.yaml or 20250724E.yaml in the
-##### config.yaml file before running.
-@hydra.main(
-        version_base=None,
-        config_path="../configs/polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves",
-        config_name="config")
-def main(cfg: DictConfig) -> None:
-    p_n_dist = cfg.topology.p_n_dist
-    w_c_dist = cfg.topology.w_c_dist
-    w_c_args = cfg.topology.w_c_args[0]
-    w_c_dfrmtn_dist = cfg.topology.w_c_dfrmtn_dist
-    w_c_dfrmtn_args = cfg.topology.w_c_dfrmtn_args[0]
-    b = cfg.topology.b
-    f = cfg.topology.f
-    p_n_args = cfg.topology.p_n_args
-    n = cfg.topology.n[0]
-    n_init = cfg.topology.n_init
-
-    clnk_rves_deformation(
-        cfg.label, 0, cfg.deformation, p_n_dist, w_c_dist, w_c_args,
-        w_c_dfrmtn_dist, w_c_dfrmtn_args, b, f, p_n_args, n, n_init)
 
 if __name__ == "__main__":
     import time

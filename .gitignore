@@ -1,7 +1,19 @@
-# Edited by jasonmulderrig on 2025-04-25
+# Edited by jasonmulderrig on 2025-12-06
 
 # DS_Store files
 .DS_Store
+
+# Hydra output directories
+**/outputs/
+
+# Raw directories
+**/raw/
+**/raw_archive/
+
+# Miscellaneous directories
+pylimer_tools_edits/
+mathematica_outputs/
+bimodal_pdms_networks/
 
 ### Temporary files component of .gitignore
 *~
@@ -14,6 +26,14 @@
 
 # dat files
 *.dat
+
+# Un-ignore dat files in the data and spherical quadrature source 
+# directories
+!/src/data/*.dat
+!/src/spherical_quadrature/*.dat
+
+# csv files
+*.csv
 
 # config files
 *.config
@@ -37,6 +57,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+include/
 lib/
 lib64/
 parts/
