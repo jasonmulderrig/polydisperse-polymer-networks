@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.special import factorial, binom
 
-def indcs_permutations(k_num: int) -> npt.NDArray[np.integer]:
+def indcs_permutations(k_num: int) -> npt.NDArray[np.int64]:
     """Permutations of indices [0, 1, ..., k_num-1].
     
     This function generates all permutations of indices
@@ -12,7 +12,7 @@ def indcs_permutations(k_num: int) -> npt.NDArray[np.integer]:
         k_num (int): Number of indices. Ideally, k_num <= 8.
     
     Returns:
-        npt.NDArray[np.integer]: Permutations of indices
+        npt.NDArray[np.int64]: Permutations of indices
         [0, 1, ..., k_num-1].
     """
     indcs = np.arange(k_num, dtype=int)
@@ -39,14 +39,14 @@ def indcs_permutations(k_num: int) -> npt.NDArray[np.integer]:
     
     return indcs_prmttns
 
-def multinomial_coeff(m: npt.NDArray[np.integer]) -> int:
+def multinomial_coeff(m: npt.NDArray[np.int64]) -> int:
     """Multinomial coefficient
     
     This function calculates the multinomial coefficient for a
     collection of integers.
 
     Args:
-        m (npt.NDArray[np.integer]): Non-negative integers
+        m (npt.NDArray[np.int64]): Non-negative integers
     
     Returns:
         int: Multinomial coefficient.
@@ -57,7 +57,7 @@ def multinomial_coeff(m: npt.NDArray[np.integer]) -> int:
 
 def permutations_with_replacement(
         num_dist_objs: int,
-        num_elems: int) -> npt.NDArray[np.integer]:
+        num_elems: int) -> npt.NDArray[np.int64]:
     """All permutations of how to arrange a number of distinguishable
     objects over a number of elements with replacement.
     
@@ -69,7 +69,7 @@ def permutations_with_replacement(
         num_elems (int): Number of elements.
     
     Returns:
-        npt.NDArray[np.integer]: All permutations of how to arrange a
+        npt.NDArray[np.int64]: All permutations of how to arrange a
         number of distinguishable objects over a number of elements with
         replacement.
     
@@ -100,7 +100,7 @@ def num_combinations_with_replacement(num_dist_objs: int, num_elems: int) -> int
 
 def indist_balls_in_dist_empty_bins_combinations(
         num_indist_balls: int,
-        num_dist_empty_bins: int) -> npt.NDArray[np.integer]:
+        num_dist_empty_bins: int) -> npt.NDArray[np.int64]:
     """All combinations of how to arrange a number of indistinguishable
     balls in a number of distinguishable bins, allowing for empty bins.
     
@@ -113,7 +113,7 @@ def indist_balls_in_dist_empty_bins_combinations(
         num_dist_empty_bins (int): Number of distinguishable bins that are each permitted to be empty.
     
     Returns:
-        npt.NDArray[np.integer]: All combinations of how to arrange a
+        npt.NDArray[np.int64]: All combinations of how to arrange a
         number of indistinguishable balls in a number of distinguishable
         bins, allowing for empty bins.
     

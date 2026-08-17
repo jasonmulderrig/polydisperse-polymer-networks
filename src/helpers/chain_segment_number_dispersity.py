@@ -1,9 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-def unit_dirac_func(
-        x: npt.ArrayLike,
-        x_0: float | int) -> npt.ArrayLike:
+def unit_dirac_func(x: npt.ArrayLike, x_0: float) -> npt.ArrayLike:
     """Unit Dirac delta function.
 
     This function calculates the unit Dirac delta function, where the
@@ -11,7 +9,7 @@ def unit_dirac_func(
 
     Args:
         x (npt.ArrayLike): Arbitrary number.
-        x_0 (float | int): Center shift.
+        x_0 (float): Center shift.
 
     Returns:
         npt.ArrayLike: Unit Dirac delta function.
@@ -19,9 +17,7 @@ def unit_dirac_func(
     """
     return np.where(np.abs(x-x_0)<1.e-10, 1.0, 0.0)
 
-def p_n_uniform_func(
-        n: npt.ArrayLike,
-        n_0: float | int) -> npt.ArrayLike:
+def p_n_uniform_func(n: npt.ArrayLike, n_0: float) -> npt.ArrayLike:
     """Uniform chain segment number probability distribution.
 
     This function calculates the probability of finding a chain with a
@@ -29,7 +25,7 @@ def p_n_uniform_func(
 
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
-        n_0 (float | int): Uniform number of segments in the chains.
+        n_0 (float): Uniform number of segments in the chains.
 
     Returns:
         npt.ArrayLike: Chain segment number uniform probability
@@ -41,8 +37,8 @@ def p_n_uniform_func(
 def p_n_bimodal_func(
         n: npt.ArrayLike,
         p_min: float,
-        n_min: float | int,
-        n_max: float | int) -> npt.ArrayLike:
+        n_min: float,
+        n_max: float) -> npt.ArrayLike:
     """Bimodal chain segment number probability distribution.
     
     This function calculates the probability of finding a chain with a
@@ -51,15 +47,15 @@ def p_n_bimodal_func(
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
         p_min (float): Probability that a chain is composed of n_min segments (and p-1 is the probability that a chain is composed of n_max segments).
-        n_min (float | int): Minimum number of segments that chains in the bimodal distribution can adopt.
-        n_max (float | int): Maximum number of segments that chains in the bimodal distribution can adopt.
+        n_min (float): Minimum number of segments that chains in the bimodal distribution can adopt.
+        n_max (float): Maximum number of segments that chains in the bimodal distribution can adopt.
     
     Returns:
         npt.ArrayLike: Chain segment number bimodal probability
         distribution.
     
     """
-    assert n_min < n_max and p_min > 0. and p_min < 1.
+    assert n_min < n_max and p_min >= 0. and p_min <= 1.
     return (
         p_min * unit_dirac_func(n, n_min)
         + (1.-p_min) * unit_dirac_func(n, n_max)
@@ -69,9 +65,9 @@ def p_n_trimodal_func(
         n: npt.ArrayLike,
         p_min: float,
         p_mid: float,
-        n_min: float | int,
-        n_mid: float | int,
-        n_max: float | int) -> npt.ArrayLike:
+        n_min: float,
+        n_mid: float,
+        n_max: float) -> npt.ArrayLike:
     """Trimodal chain segment number probability distribution.
     
     This function calculates the probability of finding a chain with a
@@ -81,9 +77,9 @@ def p_n_trimodal_func(
         n (npt.ArrayLike): Number of segments in the chain.
         p_min (float): Probability that a chain is composed of n_min segments.
         p_mid (float): Probability that a chain is composed of n_mid segments.
-        n_min (float | int): Minimum number of segments that chains in the trimodal distribution can adopt.
-        n_mid (float | int): Middle number of segments that chains in the trimodal distribution can adopt.
-        n_max (float | int): Maximum number of segments that chains in the trimodal distribution can adopt.
+        n_min (float): Minimum number of segments that chains in the trimodal distribution can adopt.
+        n_mid (float): Middle number of segments that chains in the trimodal distribution can adopt.
+        n_max (float): Maximum number of segments that chains in the trimodal distribution can adopt.
     
     Returns:
         npt.ArrayLike: Chain segment number trimodal probability
@@ -91,8 +87,8 @@ def p_n_trimodal_func(
     
     """
     assert (
-        n_min < n_mid and n_mid < n_max and p_min > 0. and p_min < 1. and
-        p_mid > 0. and p_mid < 1. and p_min + p_mid < 1.
+        n_min < n_mid and n_mid < n_max and p_min >= 0. and p_min <= 1. and
+        p_mid >= 0. and p_mid <= 1. and p_min + p_mid <= 1.
     )
     return (
         p_min * unit_dirac_func(n, n_min)
@@ -100,9 +96,7 @@ def p_n_trimodal_func(
         + (1.-p_min-p_mid) * unit_dirac_func(n, n_max)
     )
 
-def p_n_flory_func(
-        n: npt.ArrayLike,
-        n_mean: float | int) -> npt.ArrayLike:
+def p_n_flory_func(n: npt.ArrayLike, n_mean: float) -> npt.ArrayLike:
     """Chain segment number probability distribution representative of
     random step-growth linear chain polymerization, as per the theory
     from Flory.
@@ -114,7 +108,7 @@ def p_n_flory_func(
 
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
-        n_mean (float | int): Average number of segments in the polymer network.
+        n_mean (float): Average number of segments in the polymer network.
 
     Returns:
         npt.ArrayLike: Chain segment number probability distribution
@@ -123,9 +117,7 @@ def p_n_flory_func(
     """
     return (1./n_mean)*(1.-(1./n_mean))**(n-1)
 
-def p_n_maxwell_boltzmann_func(
-        n: npt.ArrayLike,
-        n_mean: float | int) -> npt.ArrayLike:
+def p_n_maxwell_boltzmann_func(n: npt.ArrayLike, n_mean: float) -> npt.ArrayLike:
     """Maxwell-Boltzmann chain segment number probability distribution.
 
     This function calculates the probability of finding a chain with a
@@ -134,7 +126,7 @@ def p_n_maxwell_boltzmann_func(
 
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
-        n_mean (float | int): Average number of segments in the polymer network.
+        n_mean (float): Average number of segments in the polymer network.
 
     Returns:
         npt.ArrayLike: Chain segment number Maxwell-Boltzmann
@@ -143,10 +135,7 @@ def p_n_maxwell_boltzmann_func(
     """
     return 32. * n**2 / (np.pi**2*n_mean**3) * np.exp(-4./np.pi*(n/n_mean)**2)
 
-def p_n_gamma_func(
-        n: npt.ArrayLike,
-        alpha: float,
-        beta: float) -> npt.ArrayLike:
+def p_n_gamma_func(n: npt.ArrayLike, alpha: float, beta: float) -> npt.ArrayLike:
     """Gamma chain segment number probability distribution.
 
     This function calculates the probability of finding a chain with a
@@ -166,10 +155,7 @@ def p_n_gamma_func(
     assert alpha > 0. and beta > 0.
     return n**alpha * np.exp(-beta*n)
 
-def p_n_weibull_func(
-        n: npt.ArrayLike,
-        m: float,
-        n_0: float) -> npt.ArrayLike:
+def p_n_weibull_func(n: npt.ArrayLike, m: float, n_0: float) -> npt.ArrayLike:
     """Weibull chain segment number probability distribution.
 
     This function calculates the probability of finding a chain with a
@@ -189,9 +175,7 @@ def p_n_weibull_func(
     assert m > 0. and n_0 > 0.
     return m / n_0 * (n/n_0)**(m-1) * np.exp(-(n/n_0)**m)
 
-def p_n_rayleigh_func(
-        n: npt.ArrayLike,
-        n_0: float) -> npt.ArrayLike:
+def p_n_rayleigh_func(n: npt.ArrayLike, n_0: float) -> npt.ArrayLike:
     """Rayleigh chain segment number probability distribution.
 
     This function calculates the probability of finding a chain with a
@@ -212,7 +196,7 @@ def p_n_rayleigh_func(
 
 def p_n_log_normal_func(
         n: npt.ArrayLike,
-        n_mean: float | int,
+        n_mean: float,
         sigma: float) -> npt.ArrayLike:
     """Log-normal chain segment number probability distribution.
 
@@ -222,7 +206,7 @@ def p_n_log_normal_func(
 
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
-        n_mean (float | int): Average number of segments in the polymer network.
+        n_mean (float): Average number of segments in the polymer network.
         sigma (float): Standard deviation of segments in the polymer network.
 
     Returns:
@@ -237,7 +221,7 @@ def p_n_log_normal_func(
 
 def p_n_inv_gaussian_func(
         n: npt.ArrayLike,
-        n_mean: float | int,
+        n_mean: float,
         lmbda: float) -> npt.ArrayLike:
     """Inverse-Gaussian chain segment number probability distribution.
 
@@ -247,7 +231,7 @@ def p_n_inv_gaussian_func(
 
     Args:
         n (npt.ArrayLike): Number of segments in the chain.
-        n_mean (float | int): Average number of segments in the polymer network.
+        n_mean (float): Average number of segments in the polymer network.
         lmbda (float): Shape parameter.
 
     Returns:
@@ -262,11 +246,11 @@ def p_n_inv_gaussian_func(
     )
 
 def p_n_init_func(
-        n: npt.NDArray[np.floating | np.integer],
+        n: npt.NDArray[np.float64],
         p_n_dist: str,
         p_n_func,
         p_n_p_args: tuple[float],
-        p_n_n_args: tuple[float] | tuple[int]) -> npt.NDArray[np.floating]:
+        p_n_n_args: tuple[float]) -> npt.NDArray[np.float64]:
     """Polymer chain segment number probability distribution
     initialization.
 
@@ -274,14 +258,14 @@ def p_n_init_func(
     number probability distribution.
 
     Args:
-        n (npt.NDArray[np.floating | np.integer]): 1D array of N entries of polymer chain segment numbers.
+        n (npt.NDArray[np.float64]): 1D array of N entries of polymer chain segment numbers.
         p_n_dist (str): Short-hand name for the selected polymer chain segment number probability distribution function.
         p_n_func (function): The polymer chain segment number probability distribution function.
         p_n_p_args (tuple[float]): Probability-related arguments packaged in a float tuple for the polymer chain segment number probability distribution function.
-        p_n_n_args (tuple[float] | tuple[int]): Chain segment number-related argments packaged in a float tuple or an int tuple for the polymer chain segment number probability distribution function.
+        p_n_n_args (tuple[float]): Chain segment number-related argments packaged in a float tuple or an int tuple for the polymer chain segment number probability distribution function.
     
     Returns:
-        npt.NDArray[np.floating]: 1D array of N float entries of the
+        npt.NDArray[np.float64]: 1D array of N float entries of the
         polymer chain segment number probability distribution.
     
     """

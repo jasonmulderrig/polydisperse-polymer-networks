@@ -4,10 +4,10 @@ from src.helpers.chain_stretch import gamma_func
 
 def r_chn_vec_func(
         ideal_numerics_form: bool,
-        F: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk: npt.NDArray[np.floating],
-        y_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        F: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk: npt.NDArray[np.float64],
+        y_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """End-to-end chain vector for a chain in the cross-link structure
     RVE.
 
@@ -16,13 +16,13 @@ def r_chn_vec_func(
 
     Args:
         ideal_numerics_form (bool): Boolean indicating if the end-to-end chain vector is calculated with respect to the ideal numerics form (if True) or the original form (if False). 
-        F (npt.NDArray[np.floating]): Deformation gradient.
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk (npt.NDArray[np.floating]): Cross-link rotation.
-        y_clnk (npt.NDArray[np.floating]): Cross-link junction position.
+        F (npt.NDArray[np.float64]): Deformation gradient.
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk (npt.NDArray[np.float64]): Cross-link rotation.
+        y_clnk (npt.NDArray[np.float64]): Cross-link junction position.
     
     Returns:
-        npt.NDArray[np.floating]: End-to-end chain vector for a chain in
+        npt.NDArray[np.float64]: End-to-end chain vector for a chain in
         the cross-link structure RVE.
     
     """
@@ -32,12 +32,12 @@ def r_chn_vec_func(
     return r_chn
 
 def r_chn_approx_vec_func(
-        F_Lmbda: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk_m: npt.NDArray[np.floating],
-        y_clnk_m: npt.NDArray[np.floating],
-        delta_Q_clnk: npt.NDArray[np.floating],
-        delta_y_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        F_Lmbda: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk_m: npt.NDArray[np.float64],
+        y_clnk_m: npt.NDArray[np.float64],
+        delta_Q_clnk: npt.NDArray[np.float64],
+        delta_y_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """End-to-end chain vector approximation for a chain in the
     cross-link structure RVE.
 
@@ -45,15 +45,15 @@ def r_chn_approx_vec_func(
     for a chain in the cross-link structure RVE.
 
     Args:
-        F_Lmbda (npt.NDArray[np.floating]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk_m (npt.NDArray[np.floating]): Cross-link rotation for the monodisperse cross-link structure RVE.
-        y_clnk_m (npt.NDArray[np.floating]): Cross-link junction position for the monodisperse cross-link structure RVE.
-        delta_Q_clnk (npt.NDArray[np.floating]): Cross-link rotation perturbation.
-        delta_y_clnk (npt.NDArray[np.floating]): Cross-link junction position perturbation.
+        F_Lmbda (npt.NDArray[np.float64]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk_m (npt.NDArray[np.float64]): Cross-link rotation for the monodisperse cross-link structure RVE.
+        y_clnk_m (npt.NDArray[np.float64]): Cross-link junction position for the monodisperse cross-link structure RVE.
+        delta_Q_clnk (npt.NDArray[np.float64]): Cross-link rotation perturbation.
+        delta_y_clnk (npt.NDArray[np.float64]): Cross-link junction position perturbation.
     
     Returns:
-        npt.NDArray[np.floating]: End-to-end chain vector approximation
+        npt.NDArray[np.float64]: End-to-end chain vector approximation
         for a chain in the cross-link structure RVE.
     
     """
@@ -64,10 +64,10 @@ def r_chn_approx_vec_func(
 
 def r_chn_func(
         ideal_numerics_form: bool,
-        F: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk: npt.NDArray[np.floating],
-        y_clnk: npt.NDArray[np.floating]) -> float:
+        F: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk: npt.NDArray[np.float64],
+        y_clnk: npt.NDArray[np.float64]) -> float:
     """End-to-end chain distance/length for a chain in the cross-link
     structure RVE.
 
@@ -76,10 +76,10 @@ def r_chn_func(
 
     Args:
         ideal_numerics_form (bool): Boolean indicating if the end-to-end chain vector is calculated with respect to the ideal numerics form (if True) or the original form (if False). 
-        F (npt.NDArray[np.floating]): Deformation gradient.
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk (npt.NDArray[np.floating]): Cross-link rotation.
-        y_clnk (npt.NDArray[np.floating]): Cross-link junction position.
+        F (npt.NDArray[np.float64]): Deformation gradient.
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk (npt.NDArray[np.float64]): Cross-link rotation.
+        y_clnk (npt.NDArray[np.float64]): Cross-link junction position.
     
     Returns:
         float: End-to-end chain distance/length for a chain in the
@@ -92,12 +92,12 @@ def r_chn_func(
     )
 
 def r_chn_approx_func(
-        F_Lmbda: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk_m: npt.NDArray[np.floating],
-        y_clnk_m: npt.NDArray[np.floating],
-        delta_Q_clnk: npt.NDArray[np.floating],
-        delta_y_clnk: npt.NDArray[np.floating]) -> float:
+        F_Lmbda: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk_m: npt.NDArray[np.float64],
+        y_clnk_m: npt.NDArray[np.float64],
+        delta_Q_clnk: npt.NDArray[np.float64],
+        delta_y_clnk: npt.NDArray[np.float64]) -> float:
     """End-to-end chain distance/length approximation for a chain in the
     cross-link structure RVE.
 
@@ -105,12 +105,12 @@ def r_chn_approx_func(
     approximation for a chain in the cross-link structure RVE.
 
     Args:
-        F_Lmbda (npt.NDArray[np.floating]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk_m (npt.NDArray[np.floating]): Cross-link rotation for the monodisperse cross-link structure RVE.
-        y_clnk_m (npt.NDArray[np.floating]): Cross-link junction position for the monodisperse cross-link structure RVE.
-        delta_Q_clnk (npt.NDArray[np.floating]): Cross-link rotation perturbation.
-        delta_y_clnk (npt.NDArray[np.floating]): Cross-link junction position perturbation.
+        F_Lmbda (npt.NDArray[np.float64]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk_m (npt.NDArray[np.float64]): Cross-link rotation for the monodisperse cross-link structure RVE.
+        y_clnk_m (npt.NDArray[np.float64]): Cross-link junction position for the monodisperse cross-link structure RVE.
+        delta_Q_clnk (npt.NDArray[np.float64]): Cross-link rotation perturbation.
+        delta_y_clnk (npt.NDArray[np.float64]): Cross-link junction position perturbation.
     
     Returns:
         float: End-to-end chain distance/length approximation for a
@@ -124,12 +124,12 @@ def r_chn_approx_func(
 
 def gamma_chn_vec_func(
         ideal_numerics_form: bool,
-        F: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk: npt.NDArray[np.floating],
-        y_clnk: npt.NDArray[np.floating],
-        n_chn: float | int,
-        b: float) -> npt.NDArray[np.floating]:
+        F: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk: npt.NDArray[np.float64],
+        y_clnk: npt.NDArray[np.float64],
+        n_chn: float,
+        b_chn: float) -> npt.NDArray[np.float64]:
     """Absolute/Equilibrium chain stretch vector for a chain in the
     cross-link structure RVE.
 
@@ -138,33 +138,33 @@ def gamma_chn_vec_func(
 
     Args:
         ideal_numerics_form (bool): Boolean indicating if the end-to-end chain vector is calculated with respect to the ideal numerics form (if True) or the original form (if False). 
-        F (npt.NDArray[np.floating]): Deformation gradient.
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk (npt.NDArray[np.floating]): Cross-link rotation.
-        y_clnk (npt.NDArray[np.floating]): Cross-link junction position.
-        n_chn (float | int): Number of chain segments.
-        b (float): Chain segment and/or cross-linker diameter.
+        F (npt.NDArray[np.float64]): Deformation gradient.
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk (npt.NDArray[np.float64]): Cross-link rotation.
+        y_clnk (npt.NDArray[np.float64]): Cross-link junction position.
+        n_chn (float): Number of chain segments.
+        b_chn (float): Chain segment and/or cross-linker diameter.
     
     Returns:
-        npt.NDArray[np.floating]: Absolute/Equilibrium chain stretch
+        npt.NDArray[np.float64]: Absolute/Equilibrium chain stretch
         vector for a chain in the cross-link structure RVE.
     
     """
     return (
         gamma_func(
             r_chn_vec_func(ideal_numerics_form, F, X_chn, Q_clnk, y_clnk),
-            n_chn, b)
+            n_chn, b_chn)
     )
 
 def gamma_chn_approx_vec_func(
-        F_Lmbda: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk_m: npt.NDArray[np.floating],
-        y_clnk_m: npt.NDArray[np.floating],
-        delta_Q_clnk: npt.NDArray[np.floating],
-        delta_y_clnk: npt.NDArray[np.floating],
-        n_chn: float | int,
-        b: float) -> npt.NDArray[np.floating]:
+        F_Lmbda: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk_m: npt.NDArray[np.float64],
+        y_clnk_m: npt.NDArray[np.float64],
+        delta_Q_clnk: npt.NDArray[np.float64],
+        delta_y_clnk: npt.NDArray[np.float64],
+        n_chn: float,
+        b_chn: float) -> npt.NDArray[np.float64]:
     """Absolute/Equilibrium chain stretch vector approximation for a
     chain in the cross-link structure RVE.
 
@@ -172,17 +172,17 @@ def gamma_chn_approx_vec_func(
     vector approximation for a chain in the cross-link structure RVE.
 
     Args:
-        F_Lmbda (npt.NDArray[np.floating]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk_m (npt.NDArray[np.floating]): Cross-link rotation for the monodisperse cross-link structure RVE.
-        y_clnk_m (npt.NDArray[np.floating]): Cross-link junction position for the monodisperse cross-link structure RVE.
-        delta_Q_clnk (npt.NDArray[np.floating]): Cross-link rotation perturbation.
-        delta_y_clnk (npt.NDArray[np.floating]): Cross-link junction position perturbation.
-        n_chn (float | int): Number of chain segments.
-        b (float): Chain segment and/or cross-linker diameter.
+        F_Lmbda (npt.NDArray[np.float64]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk_m (npt.NDArray[np.float64]): Cross-link rotation for the monodisperse cross-link structure RVE.
+        y_clnk_m (npt.NDArray[np.float64]): Cross-link junction position for the monodisperse cross-link structure RVE.
+        delta_Q_clnk (npt.NDArray[np.float64]): Cross-link rotation perturbation.
+        delta_y_clnk (npt.NDArray[np.float64]): Cross-link junction position perturbation.
+        n_chn (float): Number of chain segments.
+        b_chn (float): Chain segment and/or cross-linker diameter.
     
     Returns:
-        npt.NDArray[np.floating]: Absolute/Equilibrium chain stretch
+        npt.NDArray[np.float64]: Absolute/Equilibrium chain stretch
         vector approximation for a chain in the cross-link structure
         RVE.
     
@@ -190,17 +190,17 @@ def gamma_chn_approx_vec_func(
     return (
         gamma_func(
             r_chn_approx_vec_func(F_Lmbda, X_chn, Q_clnk_m, y_clnk_m, delta_Q_clnk, delta_y_clnk),
-            n_chn, b)
+            n_chn, b_chn)
     )
 
 def gamma_chn_func(
         ideal_numerics_form: bool,
-        F: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk: npt.NDArray[np.floating],
-        y_clnk: npt.NDArray[np.floating],
-        n_chn: float | int,
-        b: float) -> float:
+        F: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk: npt.NDArray[np.float64],
+        y_clnk: npt.NDArray[np.float64],
+        n_chn: float,
+        b_chn: float) -> float:
     """Absolute/Equilibrium chain stretch for a chain in the cross-link
     structure RVE.
 
@@ -209,12 +209,12 @@ def gamma_chn_func(
 
     Args:
         ideal_numerics_form (bool): Boolean indicating if the end-to-end chain vector is calculated with respect to the ideal numerics form (if True) or the original form (if False). 
-        F (npt.NDArray[np.floating]): Deformation gradient.
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk (npt.NDArray[np.floating]): Cross-link rotation.
-        y_clnk (npt.NDArray[np.floating]): Cross-link junction position.
-        n_chn (float | int): Number of chain segments.
-        b (float): Chain segment and/or cross-linker diameter.
+        F (npt.NDArray[np.float64]): Deformation gradient.
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk (npt.NDArray[np.float64]): Cross-link rotation.
+        y_clnk (npt.NDArray[np.float64]): Cross-link junction position.
+        n_chn (float): Number of chain segments.
+        b_chn (float): Chain segment and/or cross-linker diameter.
     
     Returns:
         float: Absolute/Equilibrium chain stretch for a chain in the
@@ -223,18 +223,19 @@ def gamma_chn_func(
     """
     return (
         gamma_func(
-            r_chn_func(ideal_numerics_form, F, X_chn, Q_clnk, y_clnk), n_chn, b)
+            r_chn_func(ideal_numerics_form, F, X_chn, Q_clnk, y_clnk),
+            n_chn, b_chn)
     )
 
 def gamma_chn_approx_func(
-        F_Lmbda: npt.NDArray[np.floating],
-        X_chn: npt.NDArray[np.floating],
-        Q_clnk_m: npt.NDArray[np.floating],
-        y_clnk_m: npt.NDArray[np.floating],
-        delta_Q_clnk: npt.NDArray[np.floating],
-        delta_y_clnk: npt.NDArray[np.floating],
-        n_chn: float | int,
-        b: float) -> float:
+        F_Lmbda: npt.NDArray[np.float64],
+        X_chn: npt.NDArray[np.float64],
+        Q_clnk_m: npt.NDArray[np.float64],
+        y_clnk_m: npt.NDArray[np.float64],
+        delta_Q_clnk: npt.NDArray[np.float64],
+        delta_y_clnk: npt.NDArray[np.float64],
+        n_chn: float,
+        b_chn: float) -> float:
     """Absolute/Equilibrium chain stretch approximation for a chain in
     the cross-link structure RVE.
 
@@ -242,14 +243,14 @@ def gamma_chn_approx_func(
     approximation for a chain in the cross-link structure RVE.
 
     Args:
-        F_Lmbda (npt.NDArray[np.floating]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
-        X_chn (npt.NDArray[np.floating]): Initial chain end position for a chain in the cross-link structure RVE.
-        Q_clnk_m (npt.NDArray[np.floating]): Cross-link rotation for the monodisperse cross-link structure RVE.
-        y_clnk_m (npt.NDArray[np.floating]): Cross-link junction position for the monodisperse cross-link structure RVE.
-        delta_Q_clnk (npt.NDArray[np.floating]): Cross-link rotation perturbation.
-        delta_y_clnk (npt.NDArray[np.floating]): Cross-link junction position perturbation.
-        n_chn (float | int): Number of chain segments.
-        b (float): Chain segment and/or cross-linker diameter.
+        F_Lmbda (npt.NDArray[np.float64]): Deformation gradient, assuming incompressibility, of the form F_Lmbda = diag(Lmbda_1, Lmbda_2, 1/(Lmbda_1*Lmbda_2)).
+        X_chn (npt.NDArray[np.float64]): Initial chain end position for a chain in the cross-link structure RVE.
+        Q_clnk_m (npt.NDArray[np.float64]): Cross-link rotation for the monodisperse cross-link structure RVE.
+        y_clnk_m (npt.NDArray[np.float64]): Cross-link junction position for the monodisperse cross-link structure RVE.
+        delta_Q_clnk (npt.NDArray[np.float64]): Cross-link rotation perturbation.
+        delta_y_clnk (npt.NDArray[np.float64]): Cross-link junction position perturbation.
+        n_chn (float): Number of chain segments.
+        b_chn (float): Chain segment and/or cross-linker diameter.
     
     Returns:
         float: Absolute/Equilibrium chain stretch approximation for a
@@ -259,12 +260,12 @@ def gamma_chn_approx_func(
     return (
         gamma_func(
             r_chn_approx_func(F_Lmbda, X_chn, Q_clnk_m, y_clnk_m, delta_Q_clnk, delta_y_clnk),
-            n_chn, b)
+            n_chn, b_chn)
     )
 
 def w_chn_func(
-        gamma: float,
-        n: float | int,
+        gamma_chn: float,
+        n_chn: float,
         w_c_func,
         w_c_args: tuple[float] | tuple[None],
         w_c_dfrmtn_func,
@@ -276,8 +277,8 @@ def w_chn_func(
     energy for a chain in the cross-link structure RVE.
 
     Args:
-        gamma (float): Absolute/Equilibrium chain stretch for a chain in the cross-link structure RVE.
-        n (float | int): Number of chain segments.
+        gamma_chn (float): Absolute/Equilibrium chain stretch for a chain in the cross-link structure RVE.
+        n_chn (float): Number of chain segments.
         w_c_func (function): Nondimensional polymer chain free energy function.
         w_c_args (tuple[float] | tuple[None]): The arguments needed for the nondimensional polymer chain free energy function (beyond the absolute/equilibrium chain stretch gamma and the number of chain segments n).
         w_c_dfrmtn_func (function): Nondimensional polymer chain deformation free energy function.
@@ -289,6 +290,6 @@ def w_chn_func(
     
     """
     return (
-        w_c_func(gamma, n, *w_c_args)
-        + w_c_dfrmtn_func(gamma, n, *w_c_dfrmtn_args)
+        w_c_func(gamma_chn, n_chn, *w_c_args)
+        + w_c_dfrmtn_func(gamma_chn, n_chn, *w_c_dfrmtn_args)
     )

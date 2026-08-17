@@ -5,7 +5,7 @@ from src.helpers.boltzmann import p_boltzmann_func
 def gamma_func(
         r: npt.ArrayLike,
         n: npt.ArrayLike,
-        b: float) -> npt.ArrayLike:
+        b: npt.ArrayLike) -> npt.ArrayLike:
     """Absolute/Equilibrium chain stretch.
 
     This function calculates the absolute/equilibrium chain stretch from
@@ -14,7 +14,7 @@ def gamma_func(
     Args:
         r (npt.ArrayLike): End-to-end chain distance/length.
         n (npt.ArrayLike): Number of chain segments.
-        b (float): Chain segment and/or cross-linker diameter.
+        b (npt.ArrayLike): Chain segment and/or cross-linker diameter.
     
     Returns:
         npt.ArrayLike: Absolute/Equilibrium chain stretch.
@@ -129,9 +129,9 @@ def master_gamma_rms_args_func(
         raise NotImplementedError(error_str)
 
 def master_gamma_rms_func(
-        points: npt.NDArray[np.floating],
-        weights: npt.NDArray[np.floating],
-        n: float | int,
+        points: npt.NDArray[np.float64],
+        weights: npt.NDArray[np.float64],
+        n: float,
         gamma_crit: float,
         gamma_n_hat_inc: float,
         w_c_dist: str,
@@ -146,9 +146,9 @@ def master_gamma_rms_func(
     polymer chain model.
 
     Args:
-        points (npt.NDArray[np.floating]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial (intact) chain configuration equilibrium probability density distribution.
-        weights (npt.NDArray[np.floating]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial (intact) chain configuration equilibrium probability density distribution.
-        n (float | int): Number of chain segments.
+        points (npt.NDArray[np.float64]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial (intact) chain configuration equilibrium probability density distribution.
+        weights (npt.NDArray[np.float64]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial (intact) chain configuration equilibrium probability density distribution.
+        n (float): Number of chain segments.
         gamma_crit (float): Critical absolute/equilibrium chain stretch.
         gamma_n_hat_inc (float): Applied segment stretch increment (for the calculation of the nondimensional rate-independent critical dissipated segment scission energy).
         w_c_dist (str): Short-hand name for the selected nondimensional polymer chain free energy function, i.e., the selected polymer chain model.

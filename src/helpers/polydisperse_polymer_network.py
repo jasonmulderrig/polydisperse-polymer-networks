@@ -17,9 +17,9 @@ from src.helpers.simulation_box import (
 from src.descriptors.descriptors import core_pb_edge_id
 from src.helpers.graph_analysis import (
     lexsorted_edges,
-    sparse_A_arr_largest_connected_component,
-    edges_and_edges_attr_to_sparse_A_arr_and_sparse_A_attr_arr,
-    sparse_A_arr_and_sparse_A_attr_arr_to_edges_and_edges_attr
+    sparse_nghbr_arr_largest_connected_component,
+    edges_and_edges_attr_to_sparse_nghbr_arr_and_sparse_nghbr_attr_arr,
+    sparse_nghbr_arr_and_sparse_nghbr_attr_arr_to_edges_and_edges_attr
 )
 from src.helpers.polymer_parameters import (
     get_bead_density,
@@ -35,10 +35,10 @@ from pylimer_tools.calc.miller_macosko_theory import predict_p_from_w_sol
 def crosslinked_polydisperse_end_linked_polymer_network_universe(
         polymer_comp: str,
         n_init: str,
-        n: tuple[int],
+        n: tuple[float],
         p_n_dist: str,
         p_n_p_args: tuple[float],
-        p_n_n_args: tuple[int],
+        p_n_n_args: tuple[float],
         en: int,
         f: int,
         chi: float,
@@ -56,10 +56,10 @@ def crosslinked_polydisperse_end_linked_polymer_network_universe(
     Args:
         polymer_comp (str): Polymer name.
         n_init (str): Short-hand description for the salient chain segment number initialization protocol; either "explicit" or "linspace".
-        n (tuple[int]): Salient chain segment numbers, or information needed to properly initialize the salient chain segment numbers.
+        n (tuple[float]): Salient chain segment numbers, or information needed to properly initialize the salient chain segment numbers.
         p_n_dist (str): Short-hand name for the selected polymer chain segment number probability distribution function.
         p_n_p_args (tuple[float]): Probability-related arguments packaged in a float tuple for the polymer chain segment number probability distribution function.
-        p_n_n_args (tuple[int]): Chain segment number-related argments packaged in an int tuple for the polymer chain segment number probability distribution function.
+        p_n_n_args (tuple[float]): Chain segment number-related argments packaged in an int tuple for the polymer chain segment number probability distribution function.
         en (int): Number of cross-linkers.
         f (int): Maximum cross-linker degree/functionality.
         chi (float): Stoichiometric imbalance between the number of cross-linker sites and the number of chain ends.
@@ -97,12 +97,14 @@ def crosslinked_polydisperse_end_linked_polymer_network_universe(
     # Number of polymer chains
     em = int(em_arg_en_func(1.*en, 1.*f, chi))
 
-    # Polymer chain segment number in each chain
-    n_chns = rng.choice(n, size=em, p=p_n)
+    # Polymer chain segment number in each chain, as integer values
+    # (calculated as the ceiling of the provided polymer chain segment
+    # numbers)
+    n_chns = rng.choice(np.ceil(n, dtype=int), size=em, p=p_n)
 
-    # Polymer chain segment particles in each chain, assuming that the
-    # provided polymer chain segment number refers to that for precursor
-    # chains prior to cross-linking
+    # Polymer chain segment particles in each chain, as integer values,
+    # assuming that the provided polymer chain segment number refers to
+    # that for precursor chains prior to cross-linking
     nu_chns = n_chns + 1
     assert np.all(np.greater_equal(nu_chns, 1))
 
@@ -150,7 +152,7 @@ def crosslinked_polydisperse_end_linked_polymer_network_universe(
 
 def crosslinked_polydisperse_end_linked_phantom_polymer_network(
         polymer_comp: str,
-        universe: Universe) -> tuple[float, float, npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating]]:
+        universe: Universe) -> tuple[float, float, npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64]]:
     """Cross-linked polydisperse end-linked phantom polymer network.
 
     This function generates a cross-linked polydisperse end-linked
@@ -171,7 +173,7 @@ def crosslinked_polydisperse_end_linked_phantom_polymer_network(
         universe (Universe): Cross-linked polydisperse end-linked polymer network universe.
     
     Returns:
-        tuple[float, float, npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating]]:
+        tuple[float, float, npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64]]:
         Polymer density (in units of particle number/nm^3), bead/segment
         distance (in units of nm), 1D array with dim float entries of
         the simulation box side lengths (in units of nm), 2D array with
@@ -296,10 +298,10 @@ def crosslinked_polydisperse_end_linked_phantom_polymer_network(
 def crosslinked_polydisperse_end_linked_phantom_polymer_network_gel(
         en: int,
         k_max: int,
-        core_nodes_type: npt.NDArray[np.integer],
-        conn_chns: npt.NDArray[np.integer],
-        conn_chns_type: npt.NDArray[np.integer],
-        n_chns: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating], int, int, float]:
+        core_nodes_type: npt.NDArray[np.int64],
+        conn_chns: npt.NDArray[np.int64],
+        conn_chns_type: npt.NDArray[np.int64],
+        n_chns: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], int, int, float]:
     """Cross-linked polydisperse end-linked phantom polymer network gel.
 
     This function extracts the gel component of a cross-linked
@@ -316,13 +318,13 @@ def crosslinked_polydisperse_end_linked_phantom_polymer_network_gel(
     Args:
         en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
         k_max (int): Maximum node degree/functionality.
-        core_nodes_type: (npt.NDArray[np.integer]): 1D array with en int entries of the type of each node in the phantom polymer network.
-        conn_chns: (npt.NDArray[np.integer]): 2D array with (em, 2) int entries corresponding to the original as-provided phantom polymer network chains/edges array.
-        conn_chns_type: (npt.NDArray[np.integer]): 1D array with em int entries of the original as-provided phantom polymer network chain type.
-        n_chns: (npt.NDArray[np.floating]): 1D array with em float entries of the number of chain segments in each original as-provided phantom polymer network chain.
+        core_nodes_type: (npt.NDArray[np.int64]): 1D array with en int entries of the type of each node in the phantom polymer network.
+        conn_chns: (npt.NDArray[np.int64]): 2D array with (em, 2) int entries corresponding to the original as-provided phantom polymer network chains/edges array.
+        conn_chns_type: (npt.NDArray[np.int64]): 1D array with em int entries of the original as-provided phantom polymer network chain type.
+        n_chns: (npt.NDArray[np.float64]): 1D array with em float entries of the number of chain segments in each original as-provided phantom polymer network chain.
     
     Returns:
-        tuple[npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating], int, int, float]:
+        tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], int, int, float]:
         2D array with (em_gel, 2) int entries corresponding to the
         chains/edges array of the phantom polymer network gel, 1D array
         with em_gel int entries of the chain type of each chain in the
@@ -341,7 +343,7 @@ def crosslinked_polydisperse_end_linked_phantom_polymer_network_gel(
     # network gel via extracting the largest connected component of the
     # phantom network
     conn_chns_gel, conn_chns_type_gel, n_chns_gel = (
-        sparse_A_arr_largest_connected_component(
+        sparse_nghbr_arr_largest_connected_component(
             en, k_max, conn_chns, conn_chns_type, n_chns)
     )
     
@@ -358,17 +360,17 @@ def crosslinked_polydisperse_end_linked_phantom_polymer_network_gel(
     )
 
 def yasuda_morita_procedure(
-        A: npt.NDArray[np.integer]) -> tuple[npt.NDArray[np.integer], int, int, int]:
+        A: npt.NDArray[np.int64]) -> tuple[npt.NDArray[np.int64], int, int, int]:
     """Yasuda-Morita procedure.
     
     This function applies the Yasuda-Morita procedure to yield the
     elastically-effective network satisfying the Scanlan-Case criteria.
 
     Args:
-        A (npt.NDArray[np.integer]): 2D array with (en, en) int entries of the adjacency matrix (with no multiedges).
+        A (npt.NDArray[np.int64]): 2D array with (en, en) int entries of the adjacency matrix (with no multiedges).
     
     Returns:
-        tuple[npt.NDArray[np.integer], int, int, int]: 2D array with
+        tuple[npt.NDArray[np.int64], int, int, int]: 2D array with
         (en, en) int entries of the adjacency matrix of the
         elastically-effective network (with no multiedges), the number
         of bridge center nodes in the as-provided polymer network, the
@@ -465,13 +467,630 @@ def yasuda_morita_procedure(
 
     return A, num_bridge_center_nodes, num_dangling_nodes, num_primary_loops
 
+def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_multichain_eval(
+        en: int,
+        num_multichains: int,
+        sparse_nghbr_arr: npt.NDArray[np.int64],
+        sparse_nghbr_n_chns_arr: npt.NDArray[np.float64],
+        naive_sparse_nghbr_n_chns_arr: npt.NDArray[np.float64]) -> tuple[bool, int, npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Multichain evaluation subroutine for the elastically-effective
+    cross-linked polydisperse end-linked phantom polymer network gel
+    extraction procedure.
+
+    This function evaluates all of the nodes in a cross-linked
+    polydisperse end-linked phantom polymer network gel to determine if
+    a given node connects to a multichain feature. If so, the multichain
+    is converted to an effective/equivalent chain via the parallel
+    spring model.
+
+    Polymer chain segments are denoted as type 1, and crosslinkers are
+    denoted as type 2. The phantom polymer chains that remain fully in
+    the simulation box are called core chains and are denoted as type 1
+    (which necessarily includes all primary loop chains), and phantom
+    polymer chains that cross the periodic boundary of the simulation
+    box are called periodic boundary crossing chains and are denoted as
+    type 2.
+
+    This subroutine assumes that all chains that connect the same pair
+    of nodes are each assumed to be of the same type.
+
+    Args:
+        en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
+        num_multichains (int): Number of multichain features that have been encountered in the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_arr (npt.NDArray[np.int64]): Symmetric sparse neighbor array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        naive_sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor naive chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+    
+    Returns:
+        tuple[bool, int, npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        Boolean flag indicating if a multichain feature was encountered,
+        number of multichain features that have been encountered in the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, symmetric
+        sparse neighbor array of the cross-linked polydisperse
+        end-linked phantom polymer network undergoing the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, corresponding
+        (symmetric) sparse neighbor chain segment number array of the
+        cross-linked polydisperse end-linked phantom polymer network
+        undergoing the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        corresponding (symmetric) sparse neighbor naive chain segment
+        number array of the cross-linked polydisperse end-linked phantom
+        polymer network undergoing the elastically-effective
+        cross-linked polydisperse end-linked phantom polymer network gel
+        extraction procedure.
+
+    """
+    multichain_cnvrsn = False
+    for node in range(en):
+        # Node is connected to at least one other node
+        if np.count_nonzero(sparse_nghbr_arr[node]) > 0:
+            # Gather unique neighbor nodes and the number of connections
+            # that exist with each unique neighbor node
+            nghbr_nodes, chn_order = np.unique(
+                sparse_nghbr_arr[node, np.nonzero(sparse_nghbr_arr[node])[0]],
+                return_counts=True)
+            # Avoid primary loop chains (which will be addressed
+            # separately)
+            nghbr_nodes, chn_order = (
+                nghbr_nodes[nghbr_nodes!=node+1], chn_order[nghbr_nodes!=node+1]
+            )
+            nghbr_nodes, chn_order = (
+                nghbr_nodes[nghbr_nodes!=-1*(node+1)],
+                chn_order[nghbr_nodes!=-1*(node+1)]
+            )
+            # Gather unique neighbor nodes with multiple connections
+            nghbr_nodes, chn_order = (
+                nghbr_nodes[chn_order>1], chn_order[chn_order>1]
+            )
+            # At least one multichain exists
+            if np.size(nghbr_nodes) > 0:
+                multichain_cnvrsn = True
+                for nghbr_node in np.nditer(nghbr_nodes):
+                    nghbr_node = int(nghbr_node)
+                    # Gather neighbor node indices
+                    nghbr_node_k_indcs = (
+                        np.where(sparse_nghbr_arr[node] == nghbr_node)[0]
+                    )
+                    # Use the parallel spring model to calculate the
+                    # effective/equivalent chain segment number in the
+                    # effective/equivalent chain, noting that the chain
+                    # segment number is a measure of spring compliance
+                    n_chn = np.reciprocal(
+                        np.sum(
+                            np.reciprocal(
+                                sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs]*1.)))
+                    # Calculate naive chain segment number in the
+                    # effective/equivalent chain
+                    naive_n_chn = np.sum(
+                        sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs])
+                    # Convert/Eliminate the multichain to a single
+                    # effective/equivalent chain
+                    sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs[0]] = n_chn
+                    naive_sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs[0]] = (
+                        naive_n_chn
+                    )
+                    sparse_nghbr_arr[node, nghbr_node_k_indcs[1:]] = 0
+                    sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs[1:]] = 0.
+                    naive_sparse_nghbr_n_chns_arr[node, nghbr_node_k_indcs[1:]] = (
+                        0.
+                    )
+                    # Address the symmetric duplicate multichain
+                    if nghbr_node > 0:
+                        symmtrc_node, symmtrc_nghbr_node = (
+                            nghbr_node - 1, node + 1
+                        )
+                    else:
+                        symmtrc_node, symmtrc_nghbr_node = (
+                            -1 * nghbr_node - 1, -1 * (node+1)
+                        )
+                    # Gather symmetric neighbor node indices
+                    symmtrc_nghbr_node_k_indcs = (
+                        np.where(sparse_nghbr_arr[symmtrc_node] == symmtrc_nghbr_node)[0]
+                    )
+                    # Convert/Eliminate the symmetric duplicate
+                    # multichain to a single effective/equivalent chain
+                    sparse_nghbr_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[0]] = (
+                        n_chn
+                    )
+                    naive_sparse_nghbr_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[0]] = (
+                        naive_n_chn
+                    )
+                    sparse_nghbr_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
+                        0
+                    )
+                    sparse_nghbr_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
+                        0.
+                    )
+                    naive_sparse_nghbr_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
+                        0.
+                    )
+                    # Sort the symmetric duplicate node row of the
+                    # sparse neighbor array and the sparse neighbor
+                    # chain segment number arrays
+                    sort_indcs = np.argsort(sparse_nghbr_arr[symmtrc_node])
+                    sparse_nghbr_arr[symmtrc_node] = (
+                        sparse_nghbr_arr[symmtrc_node, sort_indcs]
+                    )
+                    sparse_nghbr_n_chns_arr[symmtrc_node] = (
+                        sparse_nghbr_n_chns_arr[symmtrc_node, sort_indcs]
+                    )
+                    naive_sparse_nghbr_n_chns_arr[symmtrc_node] = (
+                        naive_sparse_nghbr_n_chns_arr[symmtrc_node, sort_indcs]
+                    )
+                    # Count multichain network feature
+                    num_multichains += 1
+                # Sort the node row of the sparse neighbor array and the
+                # sparse neighbor chain segment number arrays
+                sort_indcs = np.argsort(sparse_nghbr_arr[node])
+                sparse_nghbr_arr[node] = sparse_nghbr_arr[node, sort_indcs]
+                sparse_nghbr_n_chns_arr[node] = (
+                    sparse_nghbr_n_chns_arr[node, sort_indcs]
+                )
+                naive_sparse_nghbr_n_chns_arr[node] = (
+                    naive_sparse_nghbr_n_chns_arr[node, sort_indcs]
+                )
+                break
+    return (
+        multichain_cnvrsn, num_multichains, sparse_nghbr_arr,
+        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr
+    )
+
+def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_bridge_center_node_eval(
+        en: int,
+        num_bridge_center_nodes: int,
+        sparse_nghbr_arr: npt.NDArray[np.int64],
+        sparse_nghbr_n_chns_arr: npt.NDArray[np.float64],
+        naive_sparse_nghbr_n_chns_arr: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64], int, int, float, float, int, int, int, int]:
+    """Bridge center node evaluation subroutine for the
+    elastically-effective cross-linked polydisperse end-linked phantom
+    polymer network gel extraction procedure.
+
+    This function evaluates all of the nodes in a cross-linked
+    polydisperse end-linked phantom polymer network gel to determine if
+    a given node is a bridge center node. If so, the bridge center node
+    is eliminated and the two chains connecting to it are consolidated
+    and converted to an effective/equivalent chain via the series spring
+    model.
+
+    Polymer chain segments are denoted as type 1, and crosslinkers are
+    denoted as type 2. The phantom polymer chains that remain fully in
+    the simulation box are called core chains and are denoted as type 1
+    (which necessarily includes all primary loop chains), and phantom
+    polymer chains that cross the periodic boundary of the simulation
+    box are called periodic boundary crossing chains and are denoted as
+    type 2.
+
+    This subroutine assumes that if at least one of the chains
+    (connected to the bridging node) being consolidated is a type 2
+    chain (it crosses the periodic boundary of the simulation box), then
+    the resulting consolidated chain will be a type 2 chain.
+
+    Args:
+        en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
+        num_bridge_center_nodes (int): Number of bridge center nodes that have been encountered in the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_arr (npt.NDArray[np.int64]): Symmetric sparse neighbor array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        naive_sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor naive chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+    
+    Returns:
+        tuple[bool, int, npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        Boolean flag indicating if a bridge center node was encountered
+        and eliminated, number of bridge center nodes that have been
+        encountered in the elastically-effective cross-linked
+        polydisperse end-linked phantom polymer network gel extraction
+        procedure, symmetric sparse neighbor array of the cross-linked
+        polydisperse end-linked phantom polymer network undergoing the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, corresponding
+        (symmetric) sparse neighbor chain segment number array of the
+        cross-linked polydisperse end-linked phantom polymer network
+        undergoing the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        corresponding (symmetric) sparse neighbor naive chain segment
+        number array of the cross-linked polydisperse end-linked phantom
+        polymer network undergoing the elastically-effective
+        cross-linked polydisperse end-linked phantom polymer network gel
+        extraction procedure.
+
+    """
+    # Bridge center node evaluation
+    bridge_center_node_elim = False
+    for center_node in range(en):
+        # Node is connected to at least one other node
+        if np.count_nonzero(sparse_nghbr_arr[center_node]) > 0:
+            # Gather neighbor nodes
+            nghbr_nodes = (
+                sparse_nghbr_arr[center_node, np.nonzero(sparse_nghbr_arr[center_node])[0]]
+            )
+            # Avoid primary loop chains (which will be addressed
+            # separately)
+            nghbr_nodes = nghbr_nodes[nghbr_nodes!=center_node+1]
+            nghbr_nodes = nghbr_nodes[nghbr_nodes!=-1*(center_node+1)]
+            # A node that is connected to 2 distinctly different nodes
+            # is a bridge center node. Since all multichains have been
+            # eliminated before, and primary loop chains have been
+            # avoided, then if a node here has 2 connection sites
+            # filled, those two connections are necessarily with two
+            # distinctly different nodes.
+            if np.size(nghbr_nodes) == 2:
+                # Identify the two neighbor nodes as the left node and
+                # right node, connected to the bridge center node
+                left_node, right_node = int(nghbr_nodes[0]), int(nghbr_nodes[1])
+                # Bridge center node exists
+                if left_node != right_node:
+                    bridge_center_node_elim = True
+                    # Gather neighbor node indices
+                    left_node_k_indx, right_node_k_indx = (
+                        np.where(sparse_nghbr_arr[center_node] == left_node)[0][0],
+                        np.where(sparse_nghbr_arr[center_node] == right_node)[0][0]
+                    )
+                    nghbr_node_k_indcs = np.asarray(
+                        [left_node_k_indx, right_node_k_indx],
+                        dtype=int)
+                    # Use the series spring model to calculate the
+                    # effective/equivalent chain segment number in the
+                    # effective/equivalent chain, noting that the chain
+                    # segment number is a measure of spring compliance
+                    n_chn = np.sum(
+                        sparse_nghbr_n_chns_arr[center_node, nghbr_node_k_indcs])
+                    # Calculate naive chain segment number in the
+                    # effective/equivalent chain
+                    naive_n_chn = np.sum(
+                        sparse_nghbr_n_chns_arr[center_node, nghbr_node_k_indcs])
+                    # Eliminate the bridge center node
+                    sparse_nghbr_arr[center_node, nghbr_node_k_indcs] = 0
+                    sparse_nghbr_n_chns_arr[center_node, nghbr_node_k_indcs] = 0.
+                    naive_sparse_nghbr_n_chns_arr[center_node, nghbr_node_k_indcs] = (
+                        0.
+                    )
+                    # Sort the bridge center node row of the sparse
+                    # neighbor array and the sparse neighbor chain
+                    # segment number arrays
+                    sort_indcs = np.argsort(sparse_nghbr_arr[center_node])
+                    sparse_nghbr_arr[center_node] = (
+                        sparse_nghbr_arr[center_node, sort_indcs]
+                    )
+                    sparse_nghbr_n_chns_arr[center_node] = (
+                        sparse_nghbr_n_chns_arr[center_node, sort_indcs]
+                    )
+                    naive_sparse_nghbr_n_chns_arr[center_node] = (
+                        naive_sparse_nghbr_n_chns_arr[center_node, sort_indcs]
+                    )
+                    # Consolidate the two bridge center series chains
+                    # into one single effective/equivalent chain.
+                    # Consolidate first from the left node to the right
+                    # node, and sort the consolidated bridge center node
+                    # rows of the sparse neighbor array and the sparse
+                    # neighbor chain segment number arrays.
+                    if left_node > 0 and right_node > 0:
+                        sparse_nghbr_left_node = left_node - 1
+                        sparse_nghbr_center_node = center_node + 1
+                        sparse_nghbr_right_node = right_node
+                    elif left_node > 0 and right_node < 0:
+                        sparse_nghbr_left_node = left_node - 1
+                        sparse_nghbr_center_node = center_node + 1
+                        sparse_nghbr_right_node = right_node
+                    elif left_node < 0 and right_node > 0:
+                        sparse_nghbr_left_node = -1 * left_node - 1
+                        sparse_nghbr_center_node = -1 * (center_node+1)
+                        sparse_nghbr_right_node = -1 * right_node
+                    else:
+                        sparse_nghbr_left_node = -1 * left_node - 1
+                        sparse_nghbr_center_node = -1 * (center_node+1)
+                        sparse_nghbr_right_node = right_node
+                    center_node_k_indx = (
+                        np.where(sparse_nghbr_arr[sparse_nghbr_left_node] == sparse_nghbr_center_node)[0][0]
+                    )
+                    sparse_nghbr_arr[sparse_nghbr_left_node, center_node_k_indx] = (
+                        sparse_nghbr_right_node
+                    )
+                    sparse_nghbr_n_chns_arr[sparse_nghbr_left_node, center_node_k_indx] = (
+                        n_chn
+                    )
+                    naive_sparse_nghbr_n_chns_arr[sparse_nghbr_left_node, center_node_k_indx] = (
+                        naive_n_chn
+                    )
+                    sort_indcs = np.argsort(
+                        sparse_nghbr_arr[sparse_nghbr_left_node])
+                    sparse_nghbr_arr[sparse_nghbr_left_node] = (
+                        sparse_nghbr_arr[sparse_nghbr_left_node, sort_indcs]
+                    )
+                    sparse_nghbr_n_chns_arr[sparse_nghbr_left_node] = (
+                        sparse_nghbr_n_chns_arr[sparse_nghbr_left_node, sort_indcs]
+                    )
+                    naive_sparse_nghbr_n_chns_arr[sparse_nghbr_left_node] = (
+                        naive_sparse_nghbr_n_chns_arr[sparse_nghbr_left_node, sort_indcs]
+                    )
+                    # In a symmetrically duplicate fashion, consolidate
+                    # next from the right node to the left node, and
+                    # sort the consolidated bridge center node rows of
+                    # the sparse neighbor array and the sparse neighbor
+                    # chain segment number arrays
+                    if left_node > 0 and right_node > 0:
+                        sparse_nghbr_left_node = left_node
+                        sparse_nghbr_center_node = center_node + 1
+                        sparse_nghbr_right_node = right_node - 1
+                    elif left_node > 0 and right_node < 0:
+                        sparse_nghbr_left_node = -1 * left_node
+                        sparse_nghbr_center_node = -1 * (center_node+1)
+                        sparse_nghbr_right_node = -1 * right_node - 1
+                    elif left_node < 0 and right_node > 0:
+                        sparse_nghbr_left_node = left_node
+                        sparse_nghbr_center_node = center_node + 1
+                        sparse_nghbr_right_node = right_node - 1
+                    else:
+                        sparse_nghbr_left_node = left_node
+                        sparse_nghbr_center_node = -1 * (center_node+1)
+                        sparse_nghbr_right_node = -1 * right_node - 1
+                    center_node_k_indx = (
+                        np.where(sparse_nghbr_arr[sparse_nghbr_right_node] == sparse_nghbr_center_node)[0][0]
+                    )
+                    sparse_nghbr_arr[sparse_nghbr_right_node, center_node_k_indx] = (
+                        sparse_nghbr_left_node
+                    )
+                    sparse_nghbr_n_chns_arr[sparse_nghbr_right_node, center_node_k_indx] = (
+                        n_chn
+                    )
+                    naive_sparse_nghbr_n_chns_arr[sparse_nghbr_right_node, center_node_k_indx] = (
+                        naive_n_chn
+                    )
+                    sort_indcs = np.argsort(
+                        sparse_nghbr_arr[sparse_nghbr_right_node])
+                    sparse_nghbr_arr[sparse_nghbr_right_node] = (
+                        sparse_nghbr_arr[sparse_nghbr_right_node, sort_indcs]
+                    )
+                    sparse_nghbr_n_chns_arr[sparse_nghbr_right_node] = (
+                        sparse_nghbr_n_chns_arr[sparse_nghbr_right_node, sort_indcs]
+                    )
+                    naive_sparse_nghbr_n_chns_arr[sparse_nghbr_right_node] = (
+                        naive_sparse_nghbr_n_chns_arr[sparse_nghbr_right_node, sort_indcs]
+                    )
+                    # Count bridge center node network feature
+                    num_bridge_center_nodes += 1
+                    break
+    return (
+        bridge_center_node_elim, num_bridge_center_nodes, sparse_nghbr_arr,
+        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr
+    )
+
+def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_dangling_node_eval(
+        en: int,
+        num_dangling_nodes: int,
+        sparse_nghbr_arr: npt.NDArray[np.int64],
+        sparse_nghbr_n_chns_arr: npt.NDArray[np.float64],
+        naive_sparse_nghbr_n_chns_arr: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64], int, int, float, float, int, int, int, int]:
+    """Dangling node evaluation subroutine for the elastically-effective
+    cross-linked polydisperse end-linked phantom polymer network gel
+    extraction procedure.
+
+    This function evaluates all of the nodes in a cross-linked
+    polydisperse end-linked phantom polymer network gel to determine if
+    a given node is a dangling node. If so, the dangling node is
+    eliminated.
+
+    Polymer chain segments are denoted as type 1, and crosslinkers are
+    denoted as type 2. The phantom polymer chains that remain fully in
+    the simulation box are called core chains and are denoted as type 1
+    (which necessarily includes all primary loop chains), and phantom
+    polymer chains that cross the periodic boundary of the simulation
+    box are called periodic boundary crossing chains and are denoted as
+    type 2.
+
+    Args:
+        en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
+        num_dangling_nodes (int): Number of dangling nodes that have been encountered in the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_arr (npt.NDArray[np.int64]): Symmetric sparse neighbor array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        naive_sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor naive chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+    
+    Returns:
+        tuple[bool, int, npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        Boolean flag indicating if a dangling node was encountered and
+        eliminated, number of dangling nodes that have been encountered
+        in the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        symmetric sparse neighbor array of the cross-linked polydisperse
+        end-linked phantom polymer network undergoing the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, corresponding
+        (symmetric) sparse neighbor chain segment number array of the
+        cross-linked polydisperse end-linked phantom polymer network
+        undergoing the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        corresponding (symmetric) sparse neighbor naive chain segment
+        number array of the cross-linked polydisperse end-linked phantom
+        polymer network undergoing the elastically-effective
+        cross-linked polydisperse end-linked phantom polymer network gel
+        extraction procedure.
+
+    """
+    # Dangling node evaluation
+    dangling_node_elim = False
+    for dangling_node in range(en):
+        # Node is connected to at least one other node
+        if np.count_nonzero(sparse_nghbr_arr[dangling_node]) > 0:
+            # Gather neighbor nodes
+            nghbr_nodes = (
+                sparse_nghbr_arr[dangling_node, np.nonzero(sparse_nghbr_arr[dangling_node])[0]]
+            )
+            # Avoid primary loop chains (which will be addressed
+            # separately)
+            nghbr_nodes = nghbr_nodes[nghbr_nodes!=dangling_node+1]
+            nghbr_nodes = nghbr_nodes[nghbr_nodes!=-1*(dangling_node+1)]
+            # Dangling node is connected to only 1 other node; dangling
+            # node exists
+            if np.size(nghbr_nodes) == 1:
+                dangling_node_elim = True
+                # Identify the root node connected to the dangling node
+                root_node = nghbr_nodes[0]
+                # Eliminate the dangling chain from the dangling node to
+                # the root node, and sort the resulting dangling node
+                # row of the sparse neighbor array and the sparse
+                # neighbor chain segment number arrays
+                root_node_k_indx = (
+                    np.where(sparse_nghbr_arr[dangling_node] == root_node)[0][0]
+                )
+                sparse_nghbr_arr[dangling_node, root_node_k_indx] = 0
+                sparse_nghbr_n_chns_arr[dangling_node, root_node_k_indx] = 0.
+                naive_sparse_nghbr_n_chns_arr[dangling_node, root_node_k_indx] = (
+                    0.
+                )
+                sort_indcs = np.argsort(sparse_nghbr_arr[dangling_node])
+                sparse_nghbr_arr[dangling_node] = (
+                    sparse_nghbr_arr[dangling_node, sort_indcs]
+                )
+                sparse_nghbr_n_chns_arr[dangling_node] = (
+                    sparse_nghbr_n_chns_arr[dangling_node, sort_indcs]
+                )
+                naive_sparse_nghbr_n_chns_arr[dangling_node] = (
+                    naive_sparse_nghbr_n_chns_arr[dangling_node, sort_indcs]
+                )
+                # In a symmetrically duplicate fashion, eliminate the
+                # dangling chain from the root node to the dangling
+                # node, and sort the resulting root node row of the
+                # sparse neighbor array and the sparse neighbor chain
+                # segment number arrays
+                if root_node > 0:
+                    symmtrc_root_node, symmtrc_dangling_node = (
+                        root_node - 1, dangling_node + 1
+                    )
+                else:
+                    symmtrc_root_node, symmtrc_dangling_node = (
+                        -1 * root_node - 1, -1 * (dangling_node+1)
+                    )
+                symmtrc_dangling_node_k_indx = (
+                    np.where(sparse_nghbr_arr[symmtrc_root_node] == symmtrc_dangling_node)[0][0]
+                )
+                sparse_nghbr_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
+                    0
+                )
+                sparse_nghbr_n_chns_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
+                    0.
+                )
+                naive_sparse_nghbr_n_chns_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
+                    0.
+                )
+                sort_indcs = np.argsort(sparse_nghbr_arr[symmtrc_root_node])
+                sparse_nghbr_arr[symmtrc_root_node] = (
+                    sparse_nghbr_arr[symmtrc_root_node, sort_indcs]
+                )
+                sparse_nghbr_n_chns_arr[symmtrc_root_node] = (
+                    sparse_nghbr_n_chns_arr[symmtrc_root_node, sort_indcs]
+                )
+                naive_sparse_nghbr_n_chns_arr[symmtrc_root_node] = (
+                    naive_sparse_nghbr_n_chns_arr[symmtrc_root_node, sort_indcs]
+                )
+                # Count dangling node network feature
+                num_dangling_nodes += 1
+                break
+    return (
+        dangling_node_elim, num_dangling_nodes, sparse_nghbr_arr,
+        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr
+    )
+
+def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_primary_loop_eval(
+        en: int,
+        num_primary_loops: int,
+        sparse_nghbr_arr: npt.NDArray[np.int64],
+        sparse_nghbr_n_chns_arr: npt.NDArray[np.float64],
+        naive_sparse_nghbr_n_chns_arr: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64], int, int, float, float, int, int, int, int]:
+    """Primary loop evaluation subroutine for the elastically-effective
+    cross-linked polydisperse end-linked phantom polymer network gel
+    extraction procedure.
+
+    This function evaluates all of the nodes in a cross-linked
+    polydisperse end-linked phantom polymer network gel to determine if
+    a given node is connected to a primary loop. If so, the primary loop
+    is eliminated.
+
+    Polymer chain segments are denoted as type 1, and crosslinkers are
+    denoted as type 2. The phantom polymer chains that remain fully in
+    the simulation box are called core chains and are denoted as type 1
+    (which necessarily includes all primary loop chains), and phantom
+    polymer chains that cross the periodic boundary of the simulation
+    box are called periodic boundary crossing chains and are denoted as
+    type 2.
+
+    Args:
+        en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
+        num_dangling_nodes (int): Number of primary loops that have been encountered in the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_arr (npt.NDArray[np.int64]): Symmetric sparse neighbor array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+        naive_sparse_nghbr_n_chns_arr (npt.NDArray[np.float64]): Corresponding (symmetric) sparse neighbor naive chain segment number array of the cross-linked polydisperse end-linked phantom polymer network undergoing the elastically-effective cross-linked polydisperse end-linked phantom polymer network gel extraction procedure.
+    
+    Returns:
+        tuple[bool, int, npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        Boolean flag indicating if a primary loop was encountered and
+        eliminated, number of primary loops that have been encountered
+        in the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        symmetric sparse neighbor array of the cross-linked polydisperse
+        end-linked phantom polymer network undergoing the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, corresponding
+        (symmetric) sparse neighbor chain segment number array of the
+        cross-linked polydisperse end-linked phantom polymer network
+        undergoing the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure,
+        corresponding (symmetric) sparse neighbor naive chain segment
+        number array of the cross-linked polydisperse end-linked phantom
+        polymer network undergoing the elastically-effective
+        cross-linked polydisperse end-linked phantom polymer network gel
+        extraction procedure.
+
+    """
+    # Primary loop evaluation
+    primary_loop_elim = False
+    for node in range(en):
+        # Node is connected to at least one other node
+        if np.count_nonzero(sparse_nghbr_arr[node]) > 0:
+            # Gather indices of connection sites occupied by primary
+            # loops
+            primary_loop_k_indcs = (
+                np.where(np.logical_or(sparse_nghbr_arr[node]==node+1, sparse_nghbr_arr[node]==-1*(node+1)))[0]
+            )
+            num_primary_loop_k_indcs = np.size(primary_loop_k_indcs)
+            # Primary loop(s) exists
+            if num_primary_loop_k_indcs > 0:
+                # Assert that there is at least one primary loop at
+                # hand, where each primary loop occupies two connection
+                # sites
+                assert (
+                    num_primary_loop_k_indcs >= 2
+                    and num_primary_loop_k_indcs % 2 == 0
+                )
+                primary_loop_elim = True
+                # Eliminate primary loop(s), and sort the node row of
+                # the sparse neighbor array and the sparse neighbor
+                # chain segment number arrays
+                sparse_nghbr_arr[node, primary_loop_k_indcs] = 0
+                sparse_nghbr_n_chns_arr[node, primary_loop_k_indcs] = 0.
+                naive_sparse_nghbr_n_chns_arr[node, primary_loop_k_indcs] = 0.
+                sort_indcs = np.argsort(sparse_nghbr_arr[node])
+                sparse_nghbr_arr[node] = sparse_nghbr_arr[node, sort_indcs]
+                sparse_nghbr_n_chns_arr[node] = (
+                    sparse_nghbr_n_chns_arr[node, sort_indcs]
+                )
+                naive_sparse_nghbr_n_chns_arr[node] = (
+                    naive_sparse_nghbr_n_chns_arr[node, sort_indcs]
+                )
+                # Count primary loop network feature
+                num_primary_loops += 1
+                break
+    return (
+        primary_loop_elim, num_primary_loops, sparse_nghbr_arr,
+        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr
+    )
+
 def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel(
         en: int,
         k_max: int,
-        core_nodes_type: npt.NDArray[np.integer],
-        conn_chns_gel: npt.NDArray[np.integer],
-        conn_chns_type_gel: npt.NDArray[np.integer],
-        n_chns_gel: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating], npt.NDArray[np.floating], int, int, float, float, int, int, int, int]:
+        core_nodes_type: npt.NDArray[np.int64],
+        conn_chns_gel: npt.NDArray[np.int64],
+        conn_chns_type_gel: npt.NDArray[np.int64],
+        n_chns_gel: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64], int, int, float, float, int, int, int, int]:
     """Elastically-effective cross-linked polydisperse end-linked
     phantom polymer network gel extraction procedure.
 
@@ -497,13 +1116,13 @@ def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_ne
     Args:
         en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
         k_max (int): Maximum node degree/functionality.
-        core_nodes_type: (npt.NDArray[np.integer]): 1D array with en int entries of the type of each node in the phantom polymer network.
-        conn_chns_gel: (npt.NDArray[np.integer]): 2D array with (em, 2) int entries corresponding to the as-provided phantom polymer network gel chains/edges array.
-        conn_chns_type_gel: (npt.NDArray[np.integer]): 1D array with em int entries of the as-provided phantom polymer network gel chain type.
-        n_chns_gel: (npt.NDArray[np.floating]): 1D array with em float entries of the number of chain segments in each as-provided phantom polymer network gel chain.
+        core_nodes_type: (npt.NDArray[np.int64]): 1D array with en int entries of the type of each node in the phantom polymer network.
+        conn_chns_gel: (npt.NDArray[np.int64]): 2D array with (em, 2) int entries corresponding to the as-provided phantom polymer network gel chains/edges array.
+        conn_chns_type_gel: (npt.NDArray[np.int64]): 1D array with em int entries of the as-provided phantom polymer network gel chain type.
+        n_chns_gel: (npt.NDArray[np.float64]): 1D array with em float entries of the number of chain segments in each as-provided phantom polymer network gel chain.
     
     Returns:
-        tuple[npt.NDArray[np.integer], npt.NDArray[np.integer], npt.NDArray[np.floating], npt.NDArray[np.floating], int, int, float, float, int, int, int, int]:
+        tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64], int, int, float, float, int, int, int, int]:
         2D array with (em_gel_ee, 2) int entries corresponding to the
         chains/edges array of the elastically-effective phantom polymer
         network gel, 1D array with em_gel_ee int entries of the chain
@@ -536,447 +1155,62 @@ def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_ne
     num_dangling_nodes = 0
     num_primary_loops = 0
     
-    # Gather symmetric sparse adjacency array and the sparse adjacency
+    # Gather symmetric sparse neighbor array and the sparse neighbor
     # chain segment number array representing the cross-linked
     # polydisperse end-linked phantom polymer network gel
-    sparse_A_arr, sparse_A_n_chns_arr = (
-        edges_and_edges_attr_to_sparse_A_arr_and_sparse_A_attr_arr(
+    sparse_nghbr_arr, sparse_nghbr_n_chns_arr = (
+        edges_and_edges_attr_to_sparse_nghbr_arr_and_sparse_nghbr_attr_arr(
             en, k_max, conn_chns_gel, binary_edges_type=conn_chns_type_gel,
             edges_attr=n_chns_gel, symmtry=True)
     )
 
-    # Make a copy of the sparse adjacency chain segment number array.
+    # Make a copy of the sparse neighbor chain segment number array.
     # The original array stores the effective/equivalent chain segment
     # numbers in the elastically-effective cross-linked network. The
     # copied array stores the naive chain segment numbers in the
     # elastically-effective cross-linked network, which will be
     # necessary for eventually calculating the total number of chain
     # segments in the elastically-effective cross-linked network.
-    naive_sparse_A_n_chns_arr = sparse_A_n_chns_arr.copy()
+    naive_sparse_nghbr_n_chns_arr = sparse_nghbr_n_chns_arr.copy()
 
     # Elastically-effective cross-linked polydisperse end-linked phantom
     # polymer network gel extraction procedure
     while True:
-        # Initialize trackers
-        multichain_elim = False
-        bridge_center_node_elim = False
-        dangling_node_elim = False
-        primary_loop_elim = False
-
-        # Multichain elimination
-        for node in range(en):
-            # Node is connected to at least one other node
-            if np.count_nonzero(sparse_A_arr[node]) > 0:
-                # Gather unique neighbor nodes and the number of
-                # connections that exist with each unique neighbor node
-                nghbr_nodes, chn_order = np.unique(
-                    sparse_A_arr[node, np.nonzero(sparse_A_arr[node])[0]],
-                    return_counts=True)
-                # Avoid primary loop chains (which will be addressed
-                # later)
-                nghbr_nodes, chn_order = (
-                    nghbr_nodes[nghbr_nodes!=node+1],
-                    chn_order[nghbr_nodes!=node+1]
-                )
-                nghbr_nodes, chn_order = (
-                    nghbr_nodes[nghbr_nodes!=-1*(node+1)],
-                    chn_order[nghbr_nodes!=-1*(node+1)]
-                )
-                # Gather unique neighbor nodes with multiple connections
-                nghbr_nodes, chn_order = (
-                    nghbr_nodes[chn_order>1], chn_order[chn_order>1]
-                )
-                # At least one multichain exists
-                if np.size(nghbr_nodes) > 0:
-                    multichain_elim = True
-                    for nghbr_node in np.nditer(nghbr_nodes):
-                        nghbr_node = int(nghbr_node)
-                        # Gather neighbor node indices
-                        nghbr_node_k_indcs = (
-                            np.where(sparse_A_arr[node] == nghbr_node)[0]
-                        )
-                        # Use the parallel spring model to calculate the
-                        # effective/equivalent chain segment number in
-                        # the effective/equivalent chain, noting that
-                        # the chain segment number is a measure of
-                        # spring compliance
-                        n_chn = np.reciprocal(
-                            np.sum(
-                                np.reciprocal(
-                                    sparse_A_n_chns_arr[node, nghbr_node_k_indcs]*1.)))
-                        # Calculate naive chain segment number in the
-                        # effective/equivalent chain
-                        naive_n_chn = np.sum(
-                            sparse_A_n_chns_arr[node, nghbr_node_k_indcs])
-                        # Convert/Eliminate the multichain to a single
-                        # effective/equivalent chain
-                        sparse_A_n_chns_arr[node, nghbr_node_k_indcs[0]] = n_chn
-                        naive_sparse_A_n_chns_arr[node, nghbr_node_k_indcs[0]] = (
-                            naive_n_chn
-                        )
-                        sparse_A_arr[node, nghbr_node_k_indcs[1:]] = 0
-                        sparse_A_n_chns_arr[node, nghbr_node_k_indcs[1:]] = 0.
-                        naive_sparse_A_n_chns_arr[node, nghbr_node_k_indcs[1:]] = (
-                            0.
-                        )
-                        # Address the symmetric duplicate multichain
-                        if nghbr_node > 0:
-                            symmtrc_node = nghbr_node - 1
-                            symmtrc_nghbr_node = node + 1
-                        else:
-                            symmtrc_node = -1 * nghbr_node - 1
-                            symmtrc_nghbr_node = -1 * (node+1)
-                        # Gather symmetric neighbor node indices
-                        symmtrc_nghbr_node_k_indcs = (
-                            np.where(sparse_A_arr[symmtrc_node] == symmtrc_nghbr_node)[0]
-                        )
-                        # Convert/Eliminate the symmetric duplicate
-                        # multichain to a single effective/equivalent
-                        # chain
-                        sparse_A_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[0]] = (
-                            n_chn
-                        )
-                        naive_sparse_A_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[0]] = (
-                            naive_n_chn
-                        )
-                        sparse_A_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
-                            0
-                        )
-                        sparse_A_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
-                            0.
-                        )
-                        naive_sparse_A_n_chns_arr[symmtrc_node, symmtrc_nghbr_node_k_indcs[1:]] = (
-                            0.
-                        )
-                        # Sort the symmetric duplicate node row of the
-                        # sparse adjacency array and the sparse
-                        # adjacency chain segment number arrays
-                        sort_indcs = np.argsort(sparse_A_arr[symmtrc_node])
-                        sparse_A_arr[symmtrc_node] = (
-                            sparse_A_arr[symmtrc_node, sort_indcs]
-                        )
-                        sparse_A_n_chns_arr[symmtrc_node] = (
-                            sparse_A_n_chns_arr[symmtrc_node, sort_indcs]
-                        )
-                        naive_sparse_A_n_chns_arr[symmtrc_node] = (
-                            naive_sparse_A_n_chns_arr[symmtrc_node, sort_indcs]
-                        )
-                        # Count multichain network feature
-                        num_multichains += 1
-                    # Sort the node row of the sparse adjacency array
-                    # and the sparse adjacency chain segment number
-                    # arrays
-                    sort_indcs = np.argsort(sparse_A_arr[node])
-                    sparse_A_arr[node] = sparse_A_arr[node, sort_indcs]
-                    sparse_A_n_chns_arr[node] = (
-                        sparse_A_n_chns_arr[node, sort_indcs]
-                    )
-                    naive_sparse_A_n_chns_arr[node] = (
-                        naive_sparse_A_n_chns_arr[node, sort_indcs]
-                    )
-                    break
-        if multichain_elim: continue
+        # Multichain evaluation
+        (multichain_cnvrsn, num_multichains, sparse_nghbr_arr,
+         sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+            elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_multichain_eval(
+                en, num_multichains, sparse_nghbr_arr, sparse_nghbr_n_chns_arr,
+                naive_sparse_nghbr_n_chns_arr)
+        )
+        if multichain_cnvrsn: continue
         else:
-            
-            # Bridge center node elimination
-            for center_node in range(en):
-                # Node is connected to at least one other node
-                if np.count_nonzero(sparse_A_arr[center_node]) > 0:
-                    # Gather neighbor nodes
-                    nghbr_nodes = (
-                        sparse_A_arr[center_node, np.nonzero(sparse_A_arr[center_node])[0]]
-                    )
-                    # Avoid primary loop chains (which will be addressed
-                    # later)
-                    nghbr_nodes = nghbr_nodes[nghbr_nodes!=center_node+1]
-                    nghbr_nodes = nghbr_nodes[nghbr_nodes!=-1*(center_node+1)]
-                    # A node that is connected to 2 distinctly different
-                    # nodes is a bridge center node. Since all
-                    # multichains have been eliminated before, and
-                    # primary loop chains have been avoided, then if a
-                    # node here has 2 connection sites filled, those two
-                    # connections are necessarily with two distinctly
-                    # different nodes.
-                    if np.size(nghbr_nodes) == 2:
-                        # Identify the two neighbor nodes as the
-                        # left node and right node, connected to the
-                        # bridge center node
-                        left_node = int(nghbr_nodes[0])
-                        right_node = int(nghbr_nodes[1])
-                        # Bridge center node exists
-                        if left_node != right_node: # Just to be safe...
-                            bridge_center_node_elim = True
-                            # Gather neighbor node indices
-                            left_node_k_indx = (
-                                np.where(sparse_A_arr[center_node] == left_node)[0][0]
-                            )
-                            right_node_k_indx = (
-                                np.where(sparse_A_arr[center_node] == right_node)[0][0]
-                            )
-                            nghbr_node_k_indcs = np.asarray(
-                                [left_node_k_indx, right_node_k_indx],
-                                dtype=int)
-                            # Use the series spring model to calculate
-                            # the effective/equivalent chain segment
-                            # number in the effective/equivalent chain,
-                            # noting that the chain segment number is a
-                            # measure of spring compliance
-                            n_chn = np.sum(
-                                sparse_A_n_chns_arr[center_node, nghbr_node_k_indcs])
-                            # Calculate naive chain segment number in
-                            # the effective/equivalent chain
-                            naive_n_chn = np.sum(
-                                sparse_A_n_chns_arr[center_node, nghbr_node_k_indcs])
-                            # Eliminate the bridge center node
-                            sparse_A_arr[center_node, nghbr_node_k_indcs] = 0
-                            sparse_A_n_chns_arr[center_node, nghbr_node_k_indcs] = (
-                                0.
-                            )
-                            naive_sparse_A_n_chns_arr[center_node, nghbr_node_k_indcs] = (
-                                0.
-                            )
-                            # Sort the bridge center node row of the
-                            # sparse adjacency array and the sparse
-                            # adjacency chain segment number arrays
-                            sort_indcs = np.argsort(sparse_A_arr[center_node])
-                            sparse_A_arr[center_node] = (
-                                sparse_A_arr[center_node, sort_indcs]
-                            )
-                            sparse_A_n_chns_arr[center_node] = (
-                                sparse_A_n_chns_arr[center_node, sort_indcs]
-                            )
-                            naive_sparse_A_n_chns_arr[center_node] = (
-                                naive_sparse_A_n_chns_arr[center_node, sort_indcs]
-                            )
-                            # Consolidate the two bridge center series
-                            # chains into one single
-                            # effective/equivalent chain. Consolidate
-                            # first from the left node to the right
-                            # node, and sort the consolidated bridge
-                            # center node rows of the sparse adjacency
-                            # array and the sparse adjacency chain
-                            # segment number arrays
-                            if left_node > 0 and right_node > 0:
-                                sparse_A_left_node = left_node - 1
-                                sparse_A_center_node = center_node + 1
-                                sparse_A_right_node = right_node
-                            elif left_node > 0 and right_node < 0:
-                                sparse_A_left_node = left_node - 1
-                                sparse_A_center_node = center_node + 1
-                                sparse_A_right_node = right_node
-                            elif left_node < 0 and right_node > 0:
-                                sparse_A_left_node = -1 * left_node - 1
-                                sparse_A_center_node = -1 * (center_node+1)
-                                sparse_A_right_node = -1 * right_node
-                            else:
-                                sparse_A_left_node = -1 * left_node - 1
-                                sparse_A_center_node = -1 * (center_node+1)
-                                sparse_A_right_node = right_node
-                            center_node_k_indx = (
-                                np.where(sparse_A_arr[sparse_A_left_node] == sparse_A_center_node)[0][0]
-                            )
-                            sparse_A_arr[sparse_A_left_node, center_node_k_indx] = (
-                                sparse_A_right_node
-                            )
-                            sparse_A_n_chns_arr[sparse_A_left_node, center_node_k_indx] = (
-                                n_chn
-                            )
-                            naive_sparse_A_n_chns_arr[sparse_A_left_node, center_node_k_indx] = (
-                                naive_n_chn
-                            )
-                            sort_indcs = np.argsort(
-                                sparse_A_arr[sparse_A_left_node])
-                            sparse_A_arr[sparse_A_left_node] = (
-                                sparse_A_arr[sparse_A_left_node, sort_indcs]
-                            )
-                            sparse_A_n_chns_arr[sparse_A_left_node] = (
-                                sparse_A_n_chns_arr[sparse_A_left_node, sort_indcs]
-                            )
-                            naive_sparse_A_n_chns_arr[sparse_A_left_node] = (
-                                naive_sparse_A_n_chns_arr[sparse_A_left_node, sort_indcs]
-                            )
-                            # In a symmetrically duplicate fashion,
-                            # consolidate next from the right node to
-                            # the left node, and sort the consolidated
-                            # bridge center node rows of the sparse
-                            # adjacency array and the sparse adjacency
-                            # chain segment number arrays
-                            if left_node > 0 and right_node > 0:
-                                sparse_A_left_node = left_node
-                                sparse_A_center_node = center_node + 1
-                                sparse_A_right_node = right_node - 1
-                            elif left_node > 0 and right_node < 0:
-                                sparse_A_left_node = -1 * left_node
-                                sparse_A_center_node = -1 * (center_node+1)
-                                sparse_A_right_node = -1 * right_node - 1
-                            elif left_node < 0 and right_node > 0:
-                                sparse_A_left_node = left_node
-                                sparse_A_center_node = center_node + 1
-                                sparse_A_right_node = right_node - 1
-                            else:
-                                sparse_A_left_node = left_node
-                                sparse_A_center_node = -1 * (center_node+1)
-                                sparse_A_right_node = -1 * right_node - 1
-                            center_node_k_indx = (
-                                np.where(sparse_A_arr[sparse_A_right_node] == sparse_A_center_node)[0][0]
-                            )
-                            sparse_A_arr[sparse_A_right_node, center_node_k_indx] = (
-                                sparse_A_left_node
-                            )
-                            sparse_A_n_chns_arr[sparse_A_right_node, center_node_k_indx] = (
-                                n_chn
-                            )
-                            naive_sparse_A_n_chns_arr[sparse_A_right_node, center_node_k_indx] = (
-                                naive_n_chn
-                            )
-                            sort_indcs = np.argsort(
-                                sparse_A_arr[sparse_A_right_node])
-                            sparse_A_arr[sparse_A_right_node] = (
-                                sparse_A_arr[sparse_A_right_node, sort_indcs]
-                            )
-                            sparse_A_n_chns_arr[sparse_A_right_node] = (
-                                sparse_A_n_chns_arr[sparse_A_right_node, sort_indcs]
-                            )
-                            naive_sparse_A_n_chns_arr[sparse_A_right_node] = (
-                                naive_sparse_A_n_chns_arr[sparse_A_right_node, sort_indcs]
-                            )
-                            # Count bridge center node network feature
-                            num_bridge_center_nodes += 1
-                            break
+            # Bridge center node evaluation
+            (bridge_center_node_elim, num_bridge_center_nodes, sparse_nghbr_arr,
+             sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_bridge_center_node_eval(
+                    en, num_bridge_center_nodes, sparse_nghbr_arr,
+                    sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr)
+            )
             if bridge_center_node_elim: continue
             else:
-
-                # Dangling node elimination
-                for dangling_node in range(en):
-                    # Node is connected to at least one other node
-                    if np.count_nonzero(sparse_A_arr[dangling_node]) > 0:
-                        # Gather neighbor nodes
-                        nghbr_nodes = (
-                            sparse_A_arr[dangling_node, np.nonzero(sparse_A_arr[dangling_node])[0]]
-                        )
-                        # Avoid primary loop chains (which will be
-                        # addressed later)
-                        nghbr_nodes = nghbr_nodes[nghbr_nodes!=dangling_node+1]
-                        nghbr_nodes = nghbr_nodes[nghbr_nodes!=-1*(dangling_node+1)]
-                        # Dangling node is connected to only 1 other
-                        # node; dangling node exists
-                        if np.size(nghbr_nodes) == 1:
-                            dangling_node_elim = True
-                            # Identify the root node connected to the
-                            # dangling node
-                            root_node = nghbr_nodes[0]
-                            # Eliminate the dangling chain from the
-                            # dangling node to the root node, and sort
-                            # the resulting dangling node row of the
-                            # sparse adjacency array and the sparse
-                            # adjacency chain segment number arrays
-                            root_node_k_indx = (
-                                np.where(sparse_A_arr[dangling_node] == root_node)[0][0]
-                            )
-                            sparse_A_arr[dangling_node, root_node_k_indx] = 0
-                            sparse_A_n_chns_arr[dangling_node, root_node_k_indx] = (
-                                0.
-                            )
-                            naive_sparse_A_n_chns_arr[dangling_node, root_node_k_indx] = (
-                                0.
-                            )
-                            sort_indcs = np.argsort(sparse_A_arr[dangling_node])
-                            sparse_A_arr[dangling_node] = (
-                                sparse_A_arr[dangling_node, sort_indcs]
-                            )
-                            sparse_A_n_chns_arr[dangling_node] = (
-                                sparse_A_n_chns_arr[dangling_node, sort_indcs]
-                            )
-                            naive_sparse_A_n_chns_arr[dangling_node] = (
-                                naive_sparse_A_n_chns_arr[dangling_node, sort_indcs]
-                            )
-                            # In a symmetrically duplicate fashion,
-                            # eliminate the dangling chain from the root
-                            # node to the dangling node, and sort the
-                            # resulting root node row of the sparse
-                            # adjacency array and the sparse adjacency
-                            # chain segment number arrays
-                            if root_node > 0:
-                                symmtrc_root_node = root_node - 1
-                                symmtrc_dangling_node = dangling_node + 1
-                            else:
-                                symmtrc_root_node = -1 * root_node - 1
-                                symmtrc_dangling_node = -1 * (dangling_node+1)
-                            symmtrc_dangling_node_k_indx = (
-                                np.where(sparse_A_arr[symmtrc_root_node] == symmtrc_dangling_node)[0][0]
-                            )
-                            sparse_A_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
-                                0
-                            )
-                            sparse_A_n_chns_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
-                                0.
-                            )
-                            naive_sparse_A_n_chns_arr[symmtrc_root_node, symmtrc_dangling_node_k_indx] = (
-                                0.
-                            )
-                            sort_indcs = np.argsort(
-                                sparse_A_arr[symmtrc_root_node])
-                            sparse_A_arr[symmtrc_root_node] = (
-                                sparse_A_arr[symmtrc_root_node, sort_indcs]
-                            )
-                            sparse_A_n_chns_arr[symmtrc_root_node] = (
-                                sparse_A_n_chns_arr[symmtrc_root_node, sort_indcs]
-                            )
-                            naive_sparse_A_n_chns_arr[symmtrc_root_node] = (
-                                naive_sparse_A_n_chns_arr[symmtrc_root_node, sort_indcs]
-                            )
-                            # Count dangling node network feature
-                            num_dangling_nodes += 1
-                            break
+                # Dangling node evaluation
+                (dangling_node_elim, num_dangling_nodes, sparse_nghbr_arr,
+                 sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                    elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_dangling_node_eval(
+                        en, num_dangling_nodes, sparse_nghbr_arr,
+                        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr)
+                )
                 if dangling_node_elim: continue
                 else:
-
-                    # Primary loop elimination
-                    for node in range(en):
-                        # Node is connected to at least one other node
-                        if np.count_nonzero(sparse_A_arr[node]) > 0:
-                            # Gather indices of connection sites
-                            # occupied by primary loops
-                            primary_loop_k_indcs = (
-                                np.where(np.logical_or(sparse_A_arr[node]==node+1, sparse_A_arr[node]==-1*(node+1)))[0]
-                            )
-                            num_primary_loop_k_indcs = np.size(
-                                primary_loop_k_indcs)
-                            # Primary loop(s) exists
-                            if num_primary_loop_k_indcs > 0:
-                                # Assert that there is at least one
-                                # primary loop at hand, where each
-                                # primary loop occupies two connection
-                                # sites
-                                assert (
-                                    num_primary_loop_k_indcs >= 2
-                                    and num_primary_loop_k_indcs % 2 == 0
-                                )
-                                primary_loop_elim = True
-                                # Eliminate primary loop(s), and sort
-                                # the node row of the sparse adjacency
-                                # array and the sparse adjacency chain
-                                # segment number arrays
-                                sparse_A_arr[node, primary_loop_k_indcs] = 0
-                                sparse_A_n_chns_arr[node, primary_loop_k_indcs] = (
-                                    0.
-                                )
-                                naive_sparse_A_n_chns_arr[node, primary_loop_k_indcs] = (
-                                    0.
-                                )
-                                sort_indcs = np.argsort(sparse_A_arr[node])
-                                sparse_A_arr[node] = (
-                                    sparse_A_arr[node, sort_indcs]
-                                )
-                                sparse_A_n_chns_arr[node] = (
-                                    sparse_A_n_chns_arr[node, sort_indcs]
-                                )
-                                naive_sparse_A_n_chns_arr[node] = (
-                                    naive_sparse_A_n_chns_arr[node, sort_indcs]
-                                )
-                                # Count primary loop network feature
-                                num_primary_loops += 1
-                                break
+                    # Primary loop evaluation
+                    (primary_loop_elim, num_primary_loops, sparse_nghbr_arr,
+                     sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                        elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_primary_loop_eval(
+                            en, num_primary_loops, sparse_nghbr_arr,
+                            sparse_nghbr_n_chns_arr,
+                            naive_sparse_nghbr_n_chns_arr)
+                    )
                     if primary_loop_elim: continue
                     # Elastically-effective cross-linked polydisperse
                     # end-linked phantom polymer network extraction
@@ -987,18 +1221,18 @@ def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_ne
     # chain segment numbers array of the elastically-effective
     # cross-linked polydisperse end-linked phantom polymer network gel
     conn_chns_gel_ee, conn_chns_type_gel_ee, n_chns_gel_ee = (
-        sparse_A_arr_and_sparse_A_attr_arr_to_edges_and_edges_attr(
-            sparse_A_arr, return_binary_edges_type=True,
-            sparse_A_attr_arr=sparse_A_n_chns_arr)
+        sparse_nghbr_arr_and_sparse_nghbr_attr_arr_to_edges_and_edges_attr(
+            sparse_nghbr_arr, return_binary_edges_type=True,
+            sparse_nghbr_attr_arr=sparse_nghbr_n_chns_arr)
     )
     
     # Gather naive chain segment numbers array of the
     # elastically-effective cross-linked polydisperse end-linked phantom
     # polymer network gel
     _, naive_n_chns_gel_ee = (
-        sparse_A_arr_and_sparse_A_attr_arr_to_edges_and_edges_attr(
-            sparse_A_arr, return_binary_edges_type=False,
-            sparse_A_attr_arr=naive_sparse_A_n_chns_arr)
+        sparse_nghbr_arr_and_sparse_nghbr_attr_arr_to_edges_and_edges_attr(
+            sparse_nghbr_arr, return_binary_edges_type=False,
+            sparse_nghbr_attr_arr=naive_sparse_nghbr_n_chns_arr)
     )
     
     # Gather the number of elastically-effective cross-linkers, number
@@ -1017,6 +1251,186 @@ def elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_ne
         naive_n_chns_gel_ee, en_gel_ee, em_gel_ee, en_n_gel_ee, en_n_tot_gel_ee,
         num_multichains, num_bridge_center_nodes, num_dangling_nodes,
         num_primary_loops
+    )
+
+def step_by_step_elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_procedure(
+        en: int,
+        k_max: int,
+        conn_chns_gel: npt.NDArray[np.int64],
+        conn_chns_type_gel: npt.NDArray[np.int64],
+        n_chns_gel: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Step-by-step perspective of the elastically-effective
+    cross-linked polydisperse end-linked phantom polymer network gel
+    extraction procedure.
+
+    This function extracts the elastically-effective component of a
+    cross-linked polydisperse end-linked phantom polymer network gel,
+    and records the topology of the phantom polymer network gel during
+    each step of the extraction procedure.
+
+    Polymer chain segments are denoted as type 1, and crosslinkers are
+    denoted as type 2. The phantom polymer chains that remain fully in
+    the simulation box are called core chains and are denoted as type 1
+    (which necessarily includes all primary loop chains), and phantom
+    polymer chains that cross the periodic boundary of the simulation
+    box are called periodic boundary crossing chains and are denoted as
+    type 2.
+
+    Note that this extraction procedure operates upon two
+    assumptions, as follows: (1) all chains that connect the same pair
+    of nodes are each assumed to be of the same type, and (2) during
+    bridging node consolidation, if at least one of the chains
+    (connected to the bridging node) being consolidated is a type 2
+    chain (it crosses the periodic boundary of the simulation box), then
+    the resulting consolidated chain will be a type 2 chain.
+
+    Args:
+        en (int): Number of nodes in the cross-linked polydisperse end-linked phantom polymer network.
+        k_max (int): Maximum node degree/functionality.
+        conn_chns_gel: (npt.NDArray[np.int64]): 2D array with (em, 2) int entries corresponding to the as-provided phantom polymer network gel chains/edges array.
+        conn_chns_type_gel: (npt.NDArray[np.int64]): 1D array with em int entries of the as-provided phantom polymer network gel chain type.
+        n_chns_gel: (npt.NDArray[np.float64]): 1D array with em float entries of the number of chain segments in each as-provided phantom polymer network gel chain.
+    
+    Returns:
+        tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        1D array of the number of multichain features that have been
+        encountered at each step in the elastically-effective
+        cross-linked polydisperse end-linked phantom polymer network gel
+        extraction procedure, 1D array of the number of bridge center
+        nodes that have been encountered at each step in the
+        elastically-effective cross-linked polydisperse end-linked
+        phantom polymer network gel extraction procedure, 1D array of
+        the number of dangling nodes that have been encountered at each
+        step in the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure, 1D
+        array of the number of primary loops that have been encountered
+        at each step in the elastically-effective cross-linked
+        polydisperse end-linked phantom polymer network gel extraction
+        procedure, 2D array of the symmetric sparse neighbor array at
+        each step in the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure, 2D
+        array of the sparse neighbor chain segment number array at each
+        step in the elastically-effective cross-linked polydisperse
+        end-linked phantom polymer network gel extraction procedure, and
+        2D array of the sparse neighbor naive chain segment number array
+        at each step in the elastically-effective cross-linked
+        polydisperse end-linked phantom polymer network gel extraction
+        procedure.
+
+    """
+    # Initialize network feature counters
+    num_multichains = 0
+    num_bridge_center_nodes = 0
+    num_dangling_nodes = 0
+    num_primary_loops = 0
+    
+    # Gather symmetric sparse neighbor array and the sparse neighbor
+    # chain segment number array representing the cross-linked
+    # polydisperse end-linked phantom polymer network gel
+    sparse_nghbr_arr, sparse_nghbr_n_chns_arr = (
+        edges_and_edges_attr_to_sparse_nghbr_arr_and_sparse_nghbr_attr_arr(
+            en, k_max, conn_chns_gel, binary_edges_type=conn_chns_type_gel,
+            edges_attr=n_chns_gel, symmtry=True)
+    )
+
+    # Make a copy of the sparse neighbor chain segment number array.
+    # The original array stores the effective/equivalent chain segment
+    # numbers in the elastically-effective cross-linked network. The
+    # copied array stores the naive chain segment numbers in the
+    # elastically-effective cross-linked network, which will be
+    # necessary for eventually calculating the total number of chain
+    # segments in the elastically-effective cross-linked network.
+    naive_sparse_nghbr_n_chns_arr = sparse_nghbr_n_chns_arr.copy()
+
+    # Initialize lists that will store the network feature counters,
+    # symmetric sparse neighbor array, sparse neighbor chain segment
+    # number array, and the sparse neighbor naive chain segment number
+    # array during each step of the elastically-effective cross-linked
+    # polydisperse end-linked phantom polymer network gel extraction
+    # procedure
+    num_multichains_gel_ee_extrctn_prcdre = []
+    num_bridge_center_nodes_gel_ee_extrctn_prcdre = []
+    num_dangling_nodes_gel_ee_extrctn_prcdre = []
+    num_primary_loops_gel_ee_extrctn_prcdre = []
+    sparse_nghbr_arr_gel_ee_extrctn_prcdre = []
+    sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre = []
+    naive_sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre = []
+
+    # Elastically-effective cross-linked polydisperse end-linked phantom
+    # polymer network gel extraction procedure
+    while True:
+        # Store the network feature counters, symmetric sparse neighbor
+        # array, sparse neighbor chain segment number array, and the
+        # sparse neighbor naive chain segment number array at the
+        # beginning of this particular step of the elastically-effective
+        # cross-linked polydisperse end-linked phantom polymer network
+        # gel extraction procedure
+        num_multichains_gel_ee_extrctn_prcdre.append(num_multichains)
+        num_bridge_center_nodes_gel_ee_extrctn_prcdre.append(
+            num_bridge_center_nodes)
+        num_dangling_nodes_gel_ee_extrctn_prcdre.append(num_dangling_nodes)
+        num_primary_loops_gel_ee_extrctn_prcdre.append(num_primary_loops)
+        sparse_nghbr_arr_gel_ee_extrctn_prcdre.append(sparse_nghbr_arr)
+        sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre.append(
+            sparse_nghbr_n_chns_arr)
+        naive_sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre.append(
+            naive_sparse_nghbr_n_chns_arr)
+
+        # Multichain evaluation
+        (multichain_cnvrsn, num_multichains, sparse_nghbr_arr,
+         sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+            elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_multichain_eval(
+                en, num_multichains, sparse_nghbr_arr, sparse_nghbr_n_chns_arr,
+                naive_sparse_nghbr_n_chns_arr)
+        )
+        if multichain_cnvrsn: continue
+        else:
+            # Bridge center node evaluation
+            (bridge_center_node_elim, num_bridge_center_nodes, sparse_nghbr_arr,
+             sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_bridge_center_node_eval(
+                    en, num_bridge_center_nodes, sparse_nghbr_arr,
+                    sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr)
+            )
+            if bridge_center_node_elim: continue
+            else:
+                # Dangling node evaluation
+                (dangling_node_elim, num_dangling_nodes, sparse_nghbr_arr,
+                 sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                    elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_dangling_node_eval(
+                        en, num_dangling_nodes, sparse_nghbr_arr,
+                        sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr)
+                )
+                if dangling_node_elim: continue
+                else:
+                    # Primary loop evaluation
+                    (primary_loop_elim, num_primary_loops, sparse_nghbr_arr,
+                     sparse_nghbr_n_chns_arr, naive_sparse_nghbr_n_chns_arr) = (
+                        elastically_effective_crosslinked_polydisperse_end_linked_phantom_polymer_network_gel_primary_loop_eval(
+                            en, num_primary_loops, sparse_nghbr_arr,
+                            sparse_nghbr_n_chns_arr,
+                            naive_sparse_nghbr_n_chns_arr)
+                    )
+                    if primary_loop_elim: continue
+                    # Elastically-effective cross-linked polydisperse
+                    # end-linked phantom polymer network extraction
+                    # procedure has finished
+                    else: break
+
+    # Return the network feature counters, symmetric sparse neighbor
+    # array, sparse neighbor chain segment number array, and the
+    # sparse neighbor naive chain segment number array, each as an
+    # array, as they appear at each step of the elastically-effective
+    # cross-linked polydisperse end-linked phantom polymer network gel
+    # extraction procedure
+    return (
+        np.asarray(num_multichains_gel_ee_extrctn_prcdre, dtype=int),
+        np.asarray(num_bridge_center_nodes_gel_ee_extrctn_prcdre, dtype=int),
+        np.asarray(num_dangling_nodes_gel_ee_extrctn_prcdre, dtype=int),
+        np.asarray(num_primary_loops_gel_ee_extrctn_prcdre, dtype=int),
+        np.asarray(sparse_nghbr_arr_gel_ee_extrctn_prcdre, dtype=int),
+        np.asarray(sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre, dtype=float),
+        np.asarray(naive_sparse_nghbr_n_chns_arr_gel_ee_extrctn_prcdre, dtype=float)
     )
 
 def predict_xi_from_cnvrsn_for_crosslinked_polydisperse_end_linked_polymer_network(

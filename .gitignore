@@ -14,6 +14,7 @@
 pylimer_tools_edits/
 mathematica_outputs/
 bimodal_pdms_networks/
+clnk_flucts_naff_dfrmtn/
 
 ### Temporary files component of .gitignore
 *~

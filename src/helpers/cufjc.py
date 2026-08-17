@@ -1,12 +1,25 @@
 import numpy as np
 import numpy.typing as npt
-from src.helpers.utils import arccos_arg_cnstrnt_func
 from src.helpers.inv_langevin import (
     s_cn_inv_langevin_fjc_func,
     inv_langevin_func,
     inv_langevin_prime_func
 )
 from src.helpers.boltzmann import p_boltzmann_func
+
+def arccos_arg_clip_func(arccos_arg: npt.ArrayLike) -> npt.ArrayLike:
+    """Clip the argument of the arccos function.
+
+    This function clips the argument of the arccos function.
+
+    Args:
+        x (npt.ArrayLike): Argument of the arccos function.
+    
+    Returns:
+        npt.ArrayLike: Clipped argument of the arccos function.
+    
+    """
+    return np.clip(arccos_arg, -1.+1.e-14, 1.-1.e-14)
 
 def gamma_n_crit_func(kappa_n: float, zeta_n_char: float) -> float:
     """Critical segment stretch.
@@ -172,7 +185,7 @@ def subcrit_gamma_n_pade_approx_func(
             rho_tilde = rho_tilde_nmrtr / rho_tilde_dnmntr
             
             arccos_arg = 3. * rho_tilde / (2.*pi_tilde) * np.sqrt(-3./pi_tilde)
-            arccos_arg = arccos_arg_cnstrnt_func(arccos_arg)
+            arccos_arg = arccos_arg_clip_func(arccos_arg)
             cos_arg = 1. / 3. * np.arccos(arccos_arg) - 2. * np.pi / 3.
             gamma_n[indx] = (
                 2. * np.sqrt(-pi_tilde/3.) * np.cos(cos_arg)
@@ -250,7 +263,7 @@ def supercrit_gamma_n_bergstrom_approx_func(
         rho_tilde = rho_tilde_nmrtr / rho_tilde_dnmntr
         
         arccos_arg = 3. * rho_tilde / (2.*pi_tilde) * np.sqrt(-3./pi_tilde)
-        arccos_arg = arccos_arg_cnstrnt_func(arccos_arg)
+        arccos_arg = arccos_arg_clip_func(arccos_arg)
         cos_arg = 1. / 3. * np.arccos(arccos_arg) - 2. * np.pi / 3.
         gamma_n[indx] = (
             2. * np.sqrt(-pi_tilde/3.) * np.cos(cos_arg)
@@ -372,7 +385,7 @@ def subcrit_gamma_pade_approx_func(
             rho_tilde = rho_tilde_nmrtr / rho_tilde_dnmntr
 
             arccos_arg = 3. * rho_tilde / (2.*pi_tilde) * np.sqrt(-3./pi_tilde)
-            arccos_arg = arccos_arg_cnstrnt_func(arccos_arg)
+            arccos_arg = arccos_arg_clip_func(arccos_arg)
             cos_arg = 1. / 3. * np.arccos(arccos_arg) - 2. * np.pi / 3.
             gamma[indx] = (
                 2. * np.sqrt(-pi_tilde/3.) * np.cos(cos_arg)
@@ -1160,18 +1173,18 @@ def xi_c_func(
     return inv_langevin_func(gamma_comp_n)
 
 def xi_c_vec_func(
-        gamma_vec: npt.NDArray[np.floating],
+        gamma_vec: npt.NDArray[np.float64],
         gamma: float,
         kappa_n: float,
         zeta_n_char: float,
         gamma_pade_to_bergstrom_crit: float,
-        gamma_crit: float) -> npt.NDArray[np.floating]:
+        gamma_crit: float) -> npt.NDArray[np.float64]:
     """Nondimensional chain force vector.
     
     This function returns the nondimensional chain force vector.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
         gamma (float): Absolute/Equilibrium chain stretch.
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
@@ -1179,7 +1192,7 @@ def xi_c_vec_func(
         gamma_crit (float): Critical absolute/equilibrium segment stretch.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional chain force vector.
+        npt.NDArray[np.float64]: Nondimensional chain force vector.
     
     """
     return (
@@ -1188,12 +1201,12 @@ def xi_c_vec_func(
     )
 
 def dw_c__dy_clnk_func(
-        gamma_vec: npt.NDArray[np.floating],
+        gamma_vec: npt.NDArray[np.float64],
         gamma: float,
         kappa_n: float,
         zeta_n_char: float,
         gamma_pade_to_bergstrom_crit: float,
-        gamma_crit: float) -> npt.NDArray[np.floating]:
+        gamma_crit: float) -> npt.NDArray[np.float64]:
     """Nondimensional derivative of the polymer chain free energy with
     respect to the cross-link junction position for a chain in the
     cross-link structure RVE.
@@ -1203,7 +1216,7 @@ def dw_c__dy_clnk_func(
     for a chain in the cross-link structure RVE.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
         gamma (float): Absolute/Equilibrium chain stretch.
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
@@ -1211,7 +1224,7 @@ def dw_c__dy_clnk_func(
         gamma_crit (float): Critical absolute/equilibrium segment stretch.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional derivative of the
+        npt.NDArray[np.float64]: Nondimensional derivative of the
         polymer chain free energy with respect to the cross-link
         junction position for a chain in the cross-link structure RVE.
     
@@ -1223,13 +1236,13 @@ def dw_c__dy_clnk_func(
     )
 
 def d2w_c__dy_clnk_dy_clnk_func(
-        gamma_vec: npt.NDArray[np.floating],
+        gamma_vec: npt.NDArray[np.float64],
         gamma: float,
-        n: float | int,
+        n: float,
         kappa_n: float,
         zeta_n_char: float,
         gamma_pade_to_bergstrom_crit: float,
-        gamma_crit: float) -> npt.NDArray[np.floating]:
+        gamma_crit: float) -> npt.NDArray[np.float64]:
     """Nondimensional second derivative of the polymer chain free energy
     with respect to the cross-link junction position for a chain in the
     cross-link structure RVE.
@@ -1239,16 +1252,16 @@ def d2w_c__dy_clnk_dy_clnk_func(
     position for a chain in the cross-link structure RVE.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
         gamma (float): Absolute/Equilibrium chain stretch.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
         gamma_pade_to_bergstrom_crit (float): Pade-to-Bergstrom critical absolute/equilibrium segment stretch.
         gamma_crit (float): Critical absolute/equilibrium segment stretch.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional second derivative of
+        npt.NDArray[np.float64]: Nondimensional second derivative of
         the polymer chain free energy with respect to the cross-link
         junction position for a chain in the cross-link structure RVE.
     
@@ -1779,7 +1792,7 @@ def epsilon_cn_diss_hat_rate_independent_scission_func(
         gamma_n_hat_max_val: float,
         gamma_n_hat_max_val_prior: float,
         epsilon_cn_diss_hat_val_prior: float,
-        n: float | int,
+        n: float,
         kappa_n: float,
         zeta_n_char: float,
         gamma_n_pade_to_bergstrom_crit: float,
@@ -1798,7 +1811,7 @@ def epsilon_cn_diss_hat_rate_independent_scission_func(
         gamma_n_hat_max_val (float): Maximum of the applied segment stretch through all deformation history at the current state.
         gamma_n_hat_max_val_prior (float): Maximum of the applied segment stretch through all deformation history at the prior state.
         epsilon_cn_diss_hat_val_prior (float): Nondimensional rate-independent dissipated chain scission energy per segment at the prior state.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
         gamma_n_pade_to_bergstrom_crit (float): Pade-to-Bergstrom critical segment stretch.
@@ -1930,7 +1943,7 @@ def epsilon_n_diss_hat_crit_rate_independent_scission_func(
 
 def epsilon_cn_diss_hat_crit_rate_independent_scission_func(
         gamma_n_hat_inc: float,
-        n: float | int,
+        n: float,
         kappa_n: float,
         zeta_n_char: float,
         gamma_n_pade_to_bergstrom_crit: float,
@@ -1945,7 +1958,7 @@ def epsilon_cn_diss_hat_crit_rate_independent_scission_func(
 
     Args:
         gamma_n_hat_inc (float): Applied segment stretch increment.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
         gamma_n_pade_to_bergstrom_crit (float): Pade-to-Bergstrom critical segment stretch.
@@ -1996,9 +2009,9 @@ def epsilon_cn_diss_hat_crit_rate_independent_scission_func(
     return epsilon_cn_diss_hat[-1]
 
 def A_n_func(
-        points: npt.NDArray[np.floating],
-        weights: npt.NDArray[np.floating],
-        n: float | int,
+        points: npt.NDArray[np.float64],
+        weights: npt.NDArray[np.float64],
+        n: float,
         gamma_n_hat_inc: float,
         kappa_n: float,
         zeta_n_char: float,
@@ -2012,9 +2025,9 @@ def A_n_func(
     stretch via numerical quadrature.
 
     Args:
-        points (npt.NDArray[np.floating]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
-        weights (npt.NDArray[np.floating]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
-        n (float | int): Number of chain segments.
+        points (npt.NDArray[np.float64]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
+        weights (npt.NDArray[np.float64]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
+        n (float): Number of chain segments.
         gamma_n_hat_inc (float): Applied segment stretch increment (for the calculation of the nondimensional rate-independent critical dissipated segment scission energy).
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.
@@ -2114,9 +2127,9 @@ def A_n_func(
     return np.sqrt(I_2/Z_eq_tot)
 
 def Lambda_n_ref_func(
-        points: npt.NDArray[np.floating],
-        weights: npt.NDArray[np.floating],
-        n: float | int,
+        points: npt.NDArray[np.float64],
+        weights: npt.NDArray[np.float64],
+        n: float,
         gamma_n_hat_inc: float,
         kappa_n: float,
         zeta_n_char: float,
@@ -2130,9 +2143,9 @@ def Lambda_n_ref_func(
     via numerical quadrature.
 
     Args:
-        points (npt.NDArray[np.floating]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
-        weights (npt.NDArray[np.floating]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
-        n (float | int): Number of chain segments.
+        points (npt.NDArray[np.float64]): Sample points for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
+        weights (npt.NDArray[np.float64]): Weights for each sample point for Gauss-Legendre quadrature used for numerically integrating various moments of the initial intact chain configuration equilibrium probability density distribution.
+        n (float): Number of chain segments.
         gamma_n_hat_inc (float): Applied segment stretch increment (for the calculation of the nondimensional rate-independent critical dissipated segment scission energy).
         kappa_n (float): Nondimensional segment stiffness.
         zeta_n_char (float): Nondimensional characteristic segment potential energy scale.

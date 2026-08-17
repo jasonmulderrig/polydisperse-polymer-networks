@@ -1,9 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-def w_c_zero_func(
-        gamma: npt.ArrayLike,
-        n: float | int) -> npt.ArrayLike:
+def w_c_zero_func(gamma: npt.ArrayLike, n: float) -> npt.ArrayLike:
     """Always-zero nondimensional chain-level free energy.
     
     This function always returns a zero nondimensional chain-level free
@@ -11,7 +9,7 @@ def w_c_zero_func(
 
     Args:
         gamma (npt.ArrayLike): Absolute/Equilibrium chain stretch.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
     
     Returns:
         npt.ArrayLike: Always-zero nondimensional chain-level free

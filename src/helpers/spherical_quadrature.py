@@ -3,7 +3,7 @@ import numpy.typing as npt
 from src.file_io.file_io import spherical_quadrature_filepath_str
 
 def master_spherical_quadrature_func(
-        sph_quad_method: str) -> tuple[npt.NDArray[np.floating], bool]:
+        sph_quad_method: str) -> tuple[npt.NDArray[np.float64], bool]:
     """Master spherical quadrature function.
 
     This function returns the selected spherical quadrature scheme.
@@ -12,7 +12,7 @@ def master_spherical_quadrature_func(
         sph_quad_method (str): Short-hand name for the selected spherical quadrature scheme.
     
     Returns:
-        tuple[npt.NDArray[np.floating], bool]: Spherical quadrature
+        tuple[npt.NDArray[np.float64], bool]: Spherical quadrature
         scheme, boolean indicating if the spherical quadrature scheme is
         hemispherically symmetric.
     

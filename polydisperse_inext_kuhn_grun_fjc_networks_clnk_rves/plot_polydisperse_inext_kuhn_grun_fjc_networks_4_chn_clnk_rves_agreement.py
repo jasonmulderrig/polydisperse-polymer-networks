@@ -8,13 +8,9 @@ import hydra
 from omegaconf import DictConfig
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.markers import MarkerStyle
 from matplotlib.legend_handler import HandlerBase
 import matplotlib as mpl
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 mpl.rcParams["mathtext.fontset"] = "cm"
-
 from src.file_io.file_io import (
     filename_str,
     filepath_str
@@ -25,9 +21,6 @@ from src.file_io.file_io import (
         config_path="../configs/polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves",
         config_name="config")
 def main(cfg: DictConfig) -> None:
-    topology = cfg.topology
-    label = cfg.label
-
     clnk_color = ["tab:purple", "tab:green", "tab:blue", "tab:orange"]
     clnk_marker = ["^", "s", "p", "+x"]
     plusx_marker_list = ["+", "x"]
@@ -36,8 +29,29 @@ def main(cfg: DictConfig) -> None:
     markerlinewidth = 0.5
     dotlinewidth = 0.125
 
+    def n_clnks_legend_func(n_clnks):
+        clnks_num, k_num = np.shape(n_clnks)
+        n_clnks_legend = []
+        for clnk_indx in range(clnks_num):
+            clnk_str = "$\\leftparen"
+            for chn_indx in range(k_num):
+                clnk_str += f"{int(n_clnks[clnk_indx, chn_indx]):d}"
+                if chn_indx < k_num-1: clnk_str += ","
+            clnk_str += "\\rightparen$"
+            n_clnks_legend.append(clnk_str)
+        return n_clnks_legend
+
     class HandlerCompositeMarker(HandlerBase):
-        def create_artists(self, legend, orig_handle, x_descent, y_descent, width, height, fontsize, trans):
+        def create_artists(
+                self,
+                legend,
+                orig_handle,
+                x_descent,
+                y_descent,
+                width,
+                height,
+                fontsize,
+                trans):
             marker, color = orig_handle
             center_x = x_descent + width / 2
             center_y = y_descent + height / 2
@@ -67,71 +81,62 @@ def main(cfg: DictConfig) -> None:
     
     filepath = filepath_str("polydisperse_inext_kuhn_grun_fjc_networks_clnk_rves")
 
-    sample = 0
-    exact_filename_prefix = filename_str(label.workdir, "20251204", "A", sample)
-    approx_filename_prefix = filename_str(label.workdir, "20251204", "B", sample)
+    exact_filename_prefix = filename_str(cfg.label.workdir, "20260603", "A", 0)
+    approx_filename_prefix = filename_str(cfg.label.workdir, "20260603", "B", 0)
 
-    exact_n_clnks_filename = exact_filename_prefix + "-n_clnks" + ".dat"
-    approx_n_clnks_filename = approx_filename_prefix + "-n_clnks" + ".dat"
-    exact_n_clnks = np.loadtxt(exact_n_clnks_filename, dtype=int)
-    approx_n_clnks = np.loadtxt(approx_n_clnks_filename, dtype=int)
-    # print(exact_n_clnks)
-    # print(approx_n_clnks)
-
+    exact_n_clnks_filename = exact_filename_prefix + "-n_clnks" + ".npy"
+    approx_n_clnks_filename = approx_filename_prefix + "-n_clnks" + ".npy"
+    exact_n_clnks = np.load(exact_n_clnks_filename)
+    approx_n_clnks = np.load(approx_n_clnks_filename)
     assert np.allclose(exact_n_clnks, approx_n_clnks)
-
     n_clnks = exact_n_clnks
-    clnks_num, k_num = np.shape(n_clnks)
-    range_13_rves = range(0, 4)
-    range_22_rves = range(-2, 0)
-    n_clnks_legend = []
-    for clnk_indx in range(clnks_num):
-        clnk_str = "$\\leftparen"
-        for chn_indx in range(k_num):
-            clnk_str += f"{n_clnks[clnk_indx, chn_indx]:d}"
-            if chn_indx < k_num-1: clnk_str += ","
-        clnk_str += "\\rightparen$"
-        n_clnks_legend.append(clnk_str)
-    # print(n_clnks_legend)
 
-    exact_uniaxl_tens_dfrmtn_filename = (
+    geo_isomrphc_sets_num = np.shape(approx_n_clnks)[0]
+    approx_n_clnks_geo_isomrphc_sets = []
+    for set_indx in range(geo_isomrphc_sets_num):
+        approx_n_clnks_geo_isomrphc_set_filename = (
+            approx_filename_prefix
+            + f"-n_clnks_geo_isomrphc_set_indx_{set_indx:d}" + ".npy"
+        )
+        approx_n_clnks_geo_isomrphc_sets.append(
+            np.load(approx_n_clnks_geo_isomrphc_set_filename))
+
+    clnks_num = np.shape(n_clnks)[0]
+    n_clnks_13_rves_indcs = list(range(0, 4))
+    n_clnks_22_rves_indcs = list(range(4, clnks_num))
+    n_clnks_13_rves = n_clnks[n_clnks_13_rves_indcs]
+    n_clnks_22_rves = n_clnks[n_clnks_22_rves_indcs]
+    n_clnks_13_rves_legend = n_clnks_legend_func(n_clnks_13_rves)
+    n_clnks_22_rves_legend = n_clnks_legend_func(n_clnks_22_rves)
+
+    exact_uniaxl_tens_lmbda_filename = (
         exact_filename_prefix + "-dfrmtn_protocol_indx_0" + ".npy"
     )
-    exact_uniaxl_comp_dfrmtn_filename = (
+    exact_uniaxl_comp_lmbda_filename = (
         exact_filename_prefix + "-dfrmtn_protocol_indx_1" + ".npy"
     )
-    approx_uniaxl_tens_dfrmtn_filename = (
+    approx_uniaxl_tens_lmbda_filename = (
         approx_filename_prefix + "-dfrmtn_protocol_indx_0" + ".npy"
     )
-    approx_uniaxl_comp_dfrmtn_filename = (
+    approx_uniaxl_comp_lmbda_filename = (
         approx_filename_prefix + "-dfrmtn_protocol_indx_1" + ".npy"
     )
 
-    exact_uniaxl_tens_dfrmtn = np.load(exact_uniaxl_tens_dfrmtn_filename)
-    exact_uniaxl_comp_dfrmtn = np.load(exact_uniaxl_comp_dfrmtn_filename)
-    approx_uniaxl_tens_dfrmtn = np.load(approx_uniaxl_tens_dfrmtn_filename)
-    approx_uniaxl_comp_dfrmtn = np.load(approx_uniaxl_comp_dfrmtn_filename)
+    exact_uniaxl_tens_lmbda = np.load(exact_uniaxl_tens_lmbda_filename)
+    exact_uniaxl_tens_lmbda = exact_uniaxl_tens_lmbda[1:]
+    exact_uniaxl_comp_lmbda = np.flip(np.load(exact_uniaxl_comp_lmbda_filename))
+    exact_lmbda = np.hstack((exact_uniaxl_comp_lmbda, exact_uniaxl_tens_lmbda))
+    approx_uniaxl_tens_lmbda = np.load(approx_uniaxl_tens_lmbda_filename)
+    approx_uniaxl_tens_lmbda = approx_uniaxl_tens_lmbda[1:]
+    approx_uniaxl_comp_lmbda = np.flip(np.load(approx_uniaxl_comp_lmbda_filename))
+    approx_lmbda = np.hstack((approx_uniaxl_comp_lmbda, approx_uniaxl_tens_lmbda))
 
-    exact_lmbda = np.hstack((np.flip(exact_uniaxl_comp_dfrmtn)[:-1], exact_uniaxl_tens_dfrmtn))
-    approx_lmbda = np.hstack((np.flip(approx_uniaxl_comp_dfrmtn)[:-1], approx_uniaxl_tens_dfrmtn))
-    # print(exact_lmbda)
-    # print(approx_lmbda)
-    # print(np.shape(exact_lmbda))
-    # print(np.shape(approx_lmbda))
-
-    W_clnks_free_rot_uniaxl_tens_filename = (
-        exact_filename_prefix + "-W_clnks_free_rot_protocol_indx_0" + ".npy"
+    lmbda_inset_ax_min, lmbda_inset_ax_max = 1.0, 1.3
+    exact_lmbda_inset_ax_indcs = (
+        np.where(np.logical_and(exact_lmbda>=lmbda_inset_ax_min, exact_lmbda<=lmbda_inset_ax_max))[0]
     )
-    W_clnks_free_rot_uniaxl_comp_filename = (
-        exact_filename_prefix + "-W_clnks_free_rot_protocol_indx_1" + ".npy"
-    )
-    W_clnks_free_rot_approx_uniaxl_tens_filename = (
-        approx_filename_prefix
-        + "-W_clnks_free_rot_approx_protocol_indx_0" + ".npy"
-    )
-    W_clnks_free_rot_approx_uniaxl_comp_filename = (
-        approx_filename_prefix
-        + "-W_clnks_free_rot_approx_protocol_indx_1" + ".npy"
+    approx_lmbda_inset_ax_indcs = (
+        np.where(np.logical_and(approx_lmbda>=lmbda_inset_ax_min, approx_lmbda<=lmbda_inset_ax_max))[0]
     )
 
     W_clnks_frame_avrg_so3_quad_uniaxl_tens_filename = (
@@ -151,42 +156,106 @@ def main(cfg: DictConfig) -> None:
         + "-W_clnks_frame_avrg_approx_so3_quad_protocol_indx_1" + ".npy"
     )
 
-    W_clnks_free_rot_uniaxl_tens = np.transpose(
-        np.load(W_clnks_free_rot_uniaxl_tens_filename))
-    W_clnks_free_rot_uniaxl_comp = np.transpose(
-        np.load(W_clnks_free_rot_uniaxl_comp_filename))
-    W_clnks_free_rot_uniaxl = np.hstack((np.flip(W_clnks_free_rot_uniaxl_comp, axis=1)[:, :-1], W_clnks_free_rot_uniaxl_tens))
-    W_clnks_free_rot_approx_uniaxl_tens = np.transpose(
-        np.load(W_clnks_free_rot_approx_uniaxl_tens_filename))
-    W_clnks_free_rot_approx_uniaxl_comp = np.transpose(
-        np.load(W_clnks_free_rot_approx_uniaxl_comp_filename))
-    W_clnks_free_rot_approx_uniaxl = np.hstack((np.flip(W_clnks_free_rot_approx_uniaxl_comp, axis=1)[:, :-1], W_clnks_free_rot_approx_uniaxl_tens))
-
-    W_clnks_frame_avrg_so3_quad_uniaxl_tens = np.transpose(
-        np.load(W_clnks_frame_avrg_so3_quad_uniaxl_tens_filename))
-    W_clnks_frame_avrg_so3_quad_uniaxl_comp = np.transpose(
-        np.load(W_clnks_frame_avrg_so3_quad_uniaxl_comp_filename))
-    W_clnks_frame_avrg_so3_quad_uniaxl = np.hstack((np.flip(W_clnks_frame_avrg_so3_quad_uniaxl_comp, axis=1)[:, :-1], W_clnks_frame_avrg_so3_quad_uniaxl_tens))
-    W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens = np.transpose(
-        np.load(W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens_filename))
-    W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp = np.transpose(
-        np.load(W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp_filename))
-    W_clnks_frame_avrg_approx_so3_quad_uniaxl = np.hstack((np.flip(W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp, axis=1)[:, :-1], W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens))
+    W_clnks_frame_avrg_so3_quad_uniaxl_tens = np.load(
+        W_clnks_frame_avrg_so3_quad_uniaxl_tens_filename)
+    W_clnks_frame_avrg_so3_quad_uniaxl_tens = (
+        W_clnks_frame_avrg_so3_quad_uniaxl_tens[:, 1:]
+    )
+    W_clnks_frame_avrg_so3_quad_uniaxl_comp = np.flip(
+        np.load(W_clnks_frame_avrg_so3_quad_uniaxl_comp_filename),
+        axis=1)
+    W_clnks_frame_avrg_so3_quad_uniaxl = np.hstack(
+        (W_clnks_frame_avrg_so3_quad_uniaxl_comp,
+            W_clnks_frame_avrg_so3_quad_uniaxl_tens))
     
-    # print(np.shape(W_clnks_free_rot_uniaxl))
-    # print(np.shape(W_clnks_free_rot_approx_uniaxl))
-    # print(np.shape(W_clnks_frame_avrg_so3_quad_uniaxl))
-    # print(np.shape(W_clnks_frame_avrg_approx_so3_quad_uniaxl))
+    W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens = np.load(
+        W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens_filename)
+    W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens = (
+        W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens[:, 1:]
+    )
+    W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp = np.flip(
+        np.load(W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp_filename),
+        axis=1)
+    W_clnks_frame_avrg_approx_so3_quad_uniaxl = np.hstack(
+        (W_clnks_frame_avrg_approx_so3_quad_uniaxl_comp,
+            W_clnks_frame_avrg_approx_so3_quad_uniaxl_tens))
+    
+    W_clnks_free_rot_uniaxl_tens_filename = (
+        exact_filename_prefix
+        + "-W_clnks_free_rot_protocol_indx_0" + ".npy"
+    )
+    W_clnks_free_rot_uniaxl_comp_filename = (
+        exact_filename_prefix
+        + "-W_clnks_free_rot_protocol_indx_1" + ".npy"
+    )
+
+    W_clnks_free_rot_uniaxl_tens = np.load(W_clnks_free_rot_uniaxl_tens_filename)
+    W_clnks_free_rot_uniaxl_tens = W_clnks_free_rot_uniaxl_tens[:, 1:]
+    W_clnks_free_rot_uniaxl_comp = np.flip(
+        np.load(W_clnks_free_rot_uniaxl_comp_filename), axis=1)
+    W_clnks_free_rot_uniaxl = np.hstack(
+        (W_clnks_free_rot_uniaxl_comp, W_clnks_free_rot_uniaxl_tens))
+    
+    W_clnks_geo_isomrphc_sets_free_rot_approx_uniaxl = []
+    for set_indx in range(geo_isomrphc_sets_num):
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens_filename = (
+            approx_filename_prefix
+            + "-W_clnks_geo_isomrphc_sets_free_rot_approx_protocol_indx_0"
+            + "_" + f"set_indx_{set_indx:d}" + ".npy"
+        )
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp_filename = (
+            approx_filename_prefix
+            + "-W_clnks_geo_isomrphc_sets_free_rot_approx_protocol_indx_1"
+            + "_" + f"set_indx_{set_indx:d}" + ".npy"
+        )
+
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens = np.load(
+            W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens_filename)
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens = (
+            W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens[:, 1:]
+        )
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp = np.flip(
+            np.load(W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp_filename),
+            axis=1)
+        
+        for clnk_indx in range(np.shape(W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens)[0]):
+            W_clnk_geo_isomrphc_set_free_rot_approx_uniaxl_tens_delta_first_step = (
+                W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens[clnk_indx, 0]
+                - W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp[clnk_indx, -1]
+            )
+            W_clnk_geo_isomrphc_set_free_rot_approx_uniaxl_comp_delta_first_step = (
+                W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp[clnk_indx, -2]
+                - W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp[clnk_indx, -1]
+            )
+            W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens[clnk_indx] += (
+                W_clnk_geo_isomrphc_set_free_rot_approx_uniaxl_comp_delta_first_step
+                - W_clnk_geo_isomrphc_set_free_rot_approx_uniaxl_tens_delta_first_step
+            )
+        
+        W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl = np.hstack(
+            (W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_comp,
+                W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl_tens))
+        
+        W_clnks_geo_isomrphc_sets_free_rot_approx_uniaxl.append(
+            W_clnks_geo_isomrphc_set_free_rot_approx_uniaxl)
+    
+    W_clnks_free_rot_approx_uniaxl = np.empty_like(
+        W_clnks_frame_avrg_approx_so3_quad_uniaxl)
+    for set_indx in range(geo_isomrphc_sets_num):
+        W_clnks_free_rot_approx_uniaxl[set_indx] = np.min(
+            W_clnks_geo_isomrphc_sets_free_rot_approx_uniaxl[set_indx], axis=0)
 
     W_clnks_free_rot_uniaxl_agreement_13_rves_plot_fig_filename = (
-        filepath + "W_clnks_free_rot_uniaxl_agreement_13_rves_plot" + ".pdf"
+        filepath
+        + "JMPS_2026_fig_11a_W_clnks_free_rot_uniaxl_agreement_13_rves_plot"
+        + ".pdf"
     )
     fig, ax = plt.subplots()
     handles = []
-    n_clnks_13_rves_legend = []
-    for clnk_indx in range_13_rves:
-        marker = clnk_marker[clnk_indx]
-        color = clnk_color[clnk_indx]
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_13_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
         W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
         W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
         if marker == "+x":
@@ -208,7 +277,7 @@ def main(cfg: DictConfig) -> None:
             approx_lmbda, W_clnk_free_rot_approx_uniaxl, linestyle="-",
             linewidth=markerlinewidth, c=color)
         handles.append((marker, color))
-        n_clnks_13_rves_legend.append(n_clnks_legend[clnk_indx])
+        plt_format_indx += 1
     ax.legend(
         handles=handles, labels=n_clnks_13_rves_legend,
         handler_map={tuple: HandlerCompositeMarker()}, fontsize=16,
@@ -224,68 +293,161 @@ def main(cfg: DictConfig) -> None:
     ax.set_xticklabels(["$~0.5$", "$1$", "$1.5$", "$2$", "$2.5$", "$3$", "$3.5$", "$4$"])
     ax.set_yticklabels(["$5~$", "$10~$", "$15~$", "$20~$", "$25~$", "$30~$", "$35~$"])
     ax.set_xlabel("$\\lambda$", fontsize=16)
-    ax.set_ylabel("$W_{c, \\leftparen \\cdot \\rightparen }^{FR}/k_BT$", fontsize=16)
-    fig.tight_layout()
-    axins = inset_axes(
-        ax, width="100%", height="100%", bbox_to_anchor=(0.15, 0.40, 0.40, 0.325),
-        bbox_transform=ax.transAxes, loc="upper right")
-    exact_lmbda_axins_indcs = (
-        np.where(np.logical_and(exact_lmbda>=1.0, exact_lmbda<=1.3))[0]
-    )
-    approx_lmbda_axins_indcs = (
-        np.where(np.logical_and(approx_lmbda>=1.0, approx_lmbda<=1.3))[0]
-    )
-    for clnk_indx in range_13_rves:
-        marker = clnk_marker[clnk_indx]
-        color = clnk_color[clnk_indx]
+    ax.set_ylabel(
+        "$W_{c, \\leftparen \\cdot \\rightparen }^{FR}/k_BT$", fontsize=16)
+    inset_ax = ax.inset_axes([0.15, 0.40, 0.40, 0.325])
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_13_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
         W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
         W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
         if marker == "+x":
             for plusx_marker in plusx_marker_list:
-                axins.scatter(
-                    exact_lmbda[exact_lmbda_axins_indcs],
-                    W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs],
-                    s=markersize, marker=plusx_marker,
-                    linewidth=markerlinewidth, facecolors=color, clip_on=False)
+                inset_ax.scatter(
+                    exact_lmbda[exact_lmbda_inset_ax_indcs],
+                    W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+                    s=markersize, marker=plusx_marker, linewidth=markerlinewidth,
+                    facecolors=color, clip_on=False)
         else:
-            axins.scatter(
-                exact_lmbda[exact_lmbda_axins_indcs],
-                W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs], s=markersize,
-                marker=marker, linewidth=markerlinewidth, edgecolors=color,
-                facecolors="None", clip_on=False)
-        axins.scatter(
-            exact_lmbda[exact_lmbda_axins_indcs],
-            W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs], s=dotsize,
-            marker="o", linewidth=dotlinewidth, edgecolors=color,
+            inset_ax.scatter(
+                exact_lmbda[exact_lmbda_inset_ax_indcs],
+                W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+                s=markersize, marker=marker, linewidth=markerlinewidth,
+                edgecolors=color, facecolors="None", clip_on=False)
+        inset_ax.scatter(
+            exact_lmbda[exact_lmbda_inset_ax_indcs],
+            W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+            s=dotsize, marker="o", linewidth=dotlinewidth, edgecolors=color,
             facecolors=color, clip_on=False)
-        axins.plot(
-            approx_lmbda[approx_lmbda_axins_indcs],
-            W_clnk_free_rot_approx_uniaxl[approx_lmbda_axins_indcs],
+        inset_ax.plot(
+            approx_lmbda[approx_lmbda_inset_ax_indcs],
+            W_clnk_free_rot_approx_uniaxl[approx_lmbda_inset_ax_indcs], 
             linestyle="-", linewidth=markerlinewidth, c=color)
-    axins.set_xlim([1.0, 1.3])
-    axins.set_ylim([5.8, 6.4])
-    axins.tick_params(
+        plt_format_indx += 1
+    inset_ax.set_xlim([lmbda_inset_ax_min, lmbda_inset_ax_max])
+    inset_ax.set_ylim([5.8, 6.4])
+    inset_ax.tick_params(
         bottom=True, top=True, left=True, right=True, direction="in",
         labelsize=12)
-    axins.set_xticks([1.0, 1.1, 1.2, 1.3])
-    axins.set_yticks([5.9, 6.2])
-    axins.set_xticklabels(["$~1.0$", "$1.1$", "$1.2$", "$1.3$"])
-    axins.set_yticklabels(["$5.9~$", "$6.2~$"])
+    inset_ax.set_xticks([1.0, 1.1, 1.2, 1.3])
+    inset_ax.set_yticks([5.9, 6.2])
+    inset_ax.set_xticklabels(["$~1$", "$1.1$", "$1.2$", "$1.3$"])
+    inset_ax.set_yticklabels(["$5.9~$", "$6.2~$"])
+    fig.tight_layout()
     fig.savefig(W_clnks_free_rot_uniaxl_agreement_13_rves_plot_fig_filename)
     plt.close()
 
-    W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_plot_fig_filename = (
-        filepath + "W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_plot"
+    W_clnks_free_rot_uniaxl_agreement_22_rves_plot_fig_filename = (
+        filepath
+        + "JMPS_2026_fig_11b_W_clnks_free_rot_uniaxl_agreement_22_rves_plot"
         + ".pdf"
     )
     fig, ax = plt.subplots()
     handles = []
-    n_clnks_13_rves_legend = []
-    for clnk_indx in range_13_rves:
-        marker = clnk_marker[clnk_indx]
-        color = clnk_color[clnk_indx]
-        W_clnk_frame_avrg_so3_quad_uniaxl = W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
-        W_clnk_frame_avrg_approx_so3_quad_uniaxl = W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_22_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
+        W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
+        W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
+        if marker == "+x":
+            for plusx_marker in plusx_marker_list:
+                ax.scatter(
+                    exact_lmbda, W_clnk_free_rot_uniaxl, s=markersize,
+                    marker=plusx_marker, linewidth=markerlinewidth,
+                    facecolors=color, clip_on=False)
+        else:
+            ax.scatter(
+                exact_lmbda, W_clnk_free_rot_uniaxl, s=markersize,
+                marker=marker, linewidth=markerlinewidth, edgecolors=color,
+                facecolors="None", clip_on=False)
+        ax.scatter(
+            exact_lmbda, W_clnk_free_rot_uniaxl, s=dotsize, marker="o",
+            linewidth=dotlinewidth, edgecolors=color, facecolors=color,
+            clip_on=False)
+        ax.plot(
+            approx_lmbda, W_clnk_free_rot_approx_uniaxl, linestyle="-",
+            linewidth=markerlinewidth, c=color)
+        handles.append((marker, color))
+        plt_format_indx += 1
+    ax.legend(
+        handles=handles, labels=n_clnks_22_rves_legend,
+        handler_map={tuple: HandlerCompositeMarker()}, fontsize=16,
+        labelspacing=0, markerfirst=False, frameon=False, loc="upper right",
+        bbox_to_anchor=(0.525, 1.025))
+    ax.set_xlim([0.5, 4.0])
+    ax.set_ylim([5.0, 35.0])
+    ax.tick_params(
+        bottom=True, top=True, left=True, right=True, direction="in",
+        labelsize=16)
+    ax.set_xticks([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
+    ax.set_yticks([5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0])
+    ax.set_xticklabels(["$~0.5$", "$1$", "$1.5$", "$2$", "$2.5$", "$3$", "$3.5$", "$4$"])
+    ax.set_yticklabels(["$5~$", "$10~$", "$15~$", "$20~$", "$25~$", "$30~$", "$35~$"])
+    ax.set_xlabel("$\\lambda$", fontsize=16)
+    ax.set_ylabel(
+        "$W_{c, \\leftparen \\cdot \\rightparen }^{FR}/k_BT$", fontsize=16)
+    inset_ax = ax.inset_axes([0.15, 0.40, 0.40, 0.325])
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_22_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
+        W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
+        W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
+        if marker == "+x":
+            for plusx_marker in plusx_marker_list:
+                inset_ax.scatter(
+                    exact_lmbda[exact_lmbda_inset_ax_indcs],
+                    W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+                    s=markersize, marker=plusx_marker, linewidth=markerlinewidth,
+                    facecolors=color, clip_on=False)
+        else:
+            inset_ax.scatter(
+                exact_lmbda[exact_lmbda_inset_ax_indcs],
+                W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+                s=markersize, marker=marker, linewidth=markerlinewidth,
+                edgecolors=color, facecolors="None", clip_on=False)
+        inset_ax.scatter(
+            exact_lmbda[exact_lmbda_inset_ax_indcs],
+            W_clnk_free_rot_uniaxl[exact_lmbda_inset_ax_indcs],
+            s=dotsize, marker="o", linewidth=dotlinewidth, edgecolors=color,
+            facecolors=color, clip_on=False)
+        inset_ax.plot(
+            approx_lmbda[approx_lmbda_inset_ax_indcs],
+            W_clnk_free_rot_approx_uniaxl[approx_lmbda_inset_ax_indcs],
+            linestyle="-", linewidth=markerlinewidth, c=color)
+        plt_format_indx += 1
+    inset_ax.set_xlim([lmbda_inset_ax_min, lmbda_inset_ax_max])
+    inset_ax.set_ylim([5.8, 6.4])
+    inset_ax.tick_params(
+        bottom=True, top=True, left=True, right=True, direction="in",
+        labelsize=12)
+    inset_ax.set_xticks([1.0, 1.1, 1.2, 1.3])
+    inset_ax.set_yticks([5.9, 6.2])
+    inset_ax.set_xticklabels(["$~1$", "$1.1$", "$1.2$", "$1.3$"])
+    inset_ax.set_yticklabels(["$5.9~$", "$6.2~$"])
+    fig.tight_layout()
+    fig.savefig(W_clnks_free_rot_uniaxl_agreement_22_rves_plot_fig_filename)
+    plt.close()
+
+    W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_plot_fig_filename = (
+        filepath
+        + "JMPS_2026_fig_12a_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_plot"
+        + ".pdf"
+    )
+    fig, ax = plt.subplots()
+    handles = []
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_13_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
+        W_clnk_frame_avrg_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
+        )
+        W_clnk_frame_avrg_approx_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        )
         if marker == "+x":
             for plusx_marker in plusx_marker_list:
                 ax.scatter(
@@ -305,7 +467,7 @@ def main(cfg: DictConfig) -> None:
             approx_lmbda, W_clnk_frame_avrg_approx_so3_quad_uniaxl,
             linestyle="-", linewidth=markerlinewidth, c=color)
         handles.append((marker, color))
-        n_clnks_13_rves_legend.append(n_clnks_legend[clnk_indx])
+        plt_format_indx += 1
     ax.legend(
         handles=handles, labels=n_clnks_13_rves_legend,
         handler_map={tuple: HandlerCompositeMarker()}, fontsize=16,
@@ -321,170 +483,73 @@ def main(cfg: DictConfig) -> None:
     ax.set_xticklabels(["$~0.5$", "$1$", "$1.5$", "$2$", "$2.5$", "$3$", "$3.5$", "$4$"])
     ax.set_yticklabels(["$5~$", "$10~$", "$15~$", "$20~$", "$25~$", "$30~$", "$35~$"])
     ax.set_xlabel("$\\lambda$", fontsize=16)
-    ax.set_ylabel("$W_{c, \\leftparen \\cdot \\rightparen }^{FA}/k_BT$", fontsize=16)
-    fig.tight_layout()
-    axins = inset_axes(
-        ax, width="100%", height="100%", bbox_to_anchor=(0.15, 0.40, 0.40, 0.325),
-        bbox_transform=ax.transAxes, loc="upper right")
-    exact_lmbda_axins_indcs = (
-        np.where(np.logical_and(exact_lmbda>=1.0, exact_lmbda<=1.3))[0]
-    )
-    approx_lmbda_axins_indcs = (
-        np.where(np.logical_and(approx_lmbda>=1.0, approx_lmbda<=1.3))[0]
-    )
-    for clnk_indx in range_13_rves:
-        marker = clnk_marker[clnk_indx]
-        color = clnk_color[clnk_indx]
-        W_clnk_frame_avrg_so3_quad_uniaxl = W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
-        W_clnk_frame_avrg_approx_so3_quad_uniaxl = W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+    ax.set_ylabel(
+        "$W_{c, \\leftparen \\cdot \\rightparen }^{FA}/k_BT$", fontsize=16)
+    inset_ax = ax.inset_axes([0.15, 0.40, 0.40, 0.325])
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_13_rves_indcs:
+        marker = clnk_marker[plt_format_indx]
+        color = clnk_color[plt_format_indx]
+        W_clnk_frame_avrg_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
+        )
+        W_clnk_frame_avrg_approx_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        )
         if marker == "+x":
             for plusx_marker in plusx_marker_list:
-                axins.scatter(
-                    exact_lmbda[exact_lmbda_axins_indcs],
-                    W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
-                    s=markersize, marker=plusx_marker,
-                    linewidth=markerlinewidth, facecolors=color, clip_on=False)
+                inset_ax.scatter(
+                    exact_lmbda[exact_lmbda_inset_ax_indcs],
+                    W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
+                    s=markersize, marker=plusx_marker, linewidth=markerlinewidth,
+                    facecolors=color, clip_on=False)
         else:
-            axins.scatter(
-                exact_lmbda[exact_lmbda_axins_indcs],
-                W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
+            inset_ax.scatter(
+                exact_lmbda[exact_lmbda_inset_ax_indcs],
+                W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
                 s=markersize, marker=marker, linewidth=markerlinewidth,
                 edgecolors=color, facecolors="None", clip_on=False)
-        axins.scatter(
-            exact_lmbda[exact_lmbda_axins_indcs],
-            W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
+        inset_ax.scatter(
+            exact_lmbda[exact_lmbda_inset_ax_indcs],
+            W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
             s=dotsize, marker="o", linewidth=dotlinewidth, edgecolors=color,
             facecolors=color, clip_on=False)
-        axins.plot(
-            approx_lmbda[approx_lmbda_axins_indcs],
-            W_clnk_frame_avrg_approx_so3_quad_uniaxl[approx_lmbda_axins_indcs],
+        inset_ax.plot(
+            approx_lmbda[approx_lmbda_inset_ax_indcs],
+            W_clnk_frame_avrg_approx_so3_quad_uniaxl[approx_lmbda_inset_ax_indcs],
             linestyle="-", linewidth=markerlinewidth, c=color)
-    axins.set_xlim([1.0, 1.3])
-    axins.set_ylim([5.8, 6.4])
-    axins.tick_params(
+        plt_format_indx += 1
+    inset_ax.set_xlim([lmbda_inset_ax_min, lmbda_inset_ax_max])
+    inset_ax.set_ylim([5.8, 6.4])
+    inset_ax.tick_params(
         bottom=True, top=True, left=True, right=True, direction="in",
         labelsize=12)
-    axins.set_xticks([1.0, 1.1, 1.2, 1.3])
-    axins.set_yticks([5.9, 6.2])
-    axins.set_xticklabels(["$~1.0$", "$1.1$", "$1.2$", "$1.3$"])
-    axins.set_yticklabels(["$5.9~$", "$6.2~$"])
+    inset_ax.set_xticks([1.0, 1.1, 1.2, 1.3])
+    inset_ax.set_yticks([5.9, 6.2])
+    inset_ax.set_xticklabels(["$~1$", "$1.1$", "$1.2$", "$1.3$"])
+    inset_ax.set_yticklabels(["$5.9~$", "$6.2~$"])
+    fig.tight_layout()
     fig.savefig(
         W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_plot_fig_filename)
     plt.close()
 
-    W_clnks_free_rot_uniaxl_agreement_22_rves_plot_fig_filename = (
-        filepath + "W_clnks_free_rot_uniaxl_agreement_22_rves_plot" + ".pdf"
-    )
-    fig, ax = plt.subplots()
-    plt_format_indx = 0
-    handles = []
-    n_clnks_22_rves_legend = []
-    for clnk_indx in range_22_rves:
-        marker = clnk_marker[plt_format_indx]
-        color = clnk_color[plt_format_indx]
-        W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
-        W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
-        if marker == "+x":
-            for plusx_marker in plusx_marker_list:
-                ax.scatter(
-                    exact_lmbda, W_clnk_free_rot_uniaxl, s=markersize,
-                    marker=plusx_marker, linewidth=markerlinewidth,
-                    facecolors=color, clip_on=False)
-        else:
-            ax.scatter(
-                exact_lmbda, W_clnk_free_rot_uniaxl, s=markersize,
-                marker=marker, linewidth=markerlinewidth, edgecolors=color,
-                facecolors="None", clip_on=False)
-        ax.scatter(
-            exact_lmbda, W_clnk_free_rot_uniaxl, s=dotsize, marker="o",
-            linewidth=dotlinewidth, edgecolors=color, facecolors=color,
-            clip_on=False)
-        ax.plot(
-            approx_lmbda, W_clnk_free_rot_approx_uniaxl, linestyle="-",
-            linewidth=markerlinewidth, c=color)
-        handles.append((marker, color))
-        n_clnks_22_rves_legend.append(n_clnks_legend[clnk_indx])
-        plt_format_indx += 1
-    ax.legend(
-        handles=handles, labels=n_clnks_22_rves_legend,
-        handler_map={tuple: HandlerCompositeMarker()}, fontsize=16,
-        labelspacing=0, markerfirst=False, frameon=False, loc="upper right",
-        bbox_to_anchor=(0.525, 1.025))
-    ax.set_xlim([0.5, 4.0])
-    ax.set_ylim([5.0, 35.0])
-    ax.tick_params(
-        bottom=True, top=True, left=True, right=True, direction="in",
-        labelsize=16)
-    ax.set_xticks([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
-    ax.set_yticks([5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0])
-    ax.set_xticklabels(["$~0.5$", "$1$", "$1.5$", "$2$", "$2.5$", "$3$", "$3.5$", "$4$"])
-    ax.set_yticklabels(["$5~$", "$10~$", "$15~$", "$20~$", "$25~$", "$30~$", "$35~$"])
-    ax.set_xlabel("$\\lambda$", fontsize=16)
-    ax.set_ylabel("$W_{c, \\leftparen \\cdot \\rightparen }^{FR}/k_BT$", fontsize=16)
-    fig.tight_layout()
-    axins = inset_axes(
-        ax, width="100%", height="100%", bbox_to_anchor=(0.15, 0.40, 0.40, 0.325),
-        bbox_transform=ax.transAxes, loc="upper right")
-    exact_lmbda_axins_indcs = (
-        np.where(np.logical_and(exact_lmbda>=1.0, exact_lmbda<=1.3))[0]
-    )
-    approx_lmbda_axins_indcs = (
-        np.where(np.logical_and(approx_lmbda>=1.0, approx_lmbda<=1.3))[0]
-    )
-    plt_format_indx = 0
-    for clnk_indx in range_22_rves:
-        marker = clnk_marker[plt_format_indx]
-        color = clnk_color[plt_format_indx]
-        W_clnk_free_rot_uniaxl = W_clnks_free_rot_uniaxl[clnk_indx]
-        W_clnk_free_rot_approx_uniaxl = W_clnks_free_rot_approx_uniaxl[clnk_indx]
-        if marker == "+x":
-            for plusx_marker in plusx_marker_list:
-                axins.scatter(
-                    exact_lmbda[exact_lmbda_axins_indcs],
-                    W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs],
-                    s=markersize, marker=plusx_marker,
-                    linewidth=markerlinewidth, facecolors=color, clip_on=False)
-        else:
-            axins.scatter(
-                exact_lmbda[exact_lmbda_axins_indcs],
-                W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs], s=markersize,
-                marker=marker, linewidth=markerlinewidth, edgecolors=color,
-                facecolors="None", clip_on=False)
-        axins.scatter(
-            exact_lmbda[exact_lmbda_axins_indcs],
-            W_clnk_free_rot_uniaxl[exact_lmbda_axins_indcs], s=dotsize,
-            marker="o", linewidth=dotlinewidth, edgecolors=color,
-            facecolors=color, clip_on=False)
-        axins.plot(
-            approx_lmbda[approx_lmbda_axins_indcs],
-            W_clnk_free_rot_approx_uniaxl[approx_lmbda_axins_indcs],
-            linestyle="-", linewidth=markerlinewidth, c=color)
-        plt_format_indx += 1
-    axins.set_xlim([1.0, 1.3])
-    axins.set_ylim([5.8, 6.4])
-    axins.tick_params(
-        bottom=True, top=True, left=True, right=True, direction="in",
-        labelsize=12)
-    axins.set_xticks([1.0, 1.1, 1.2, 1.3])
-    axins.set_yticks([5.9, 6.2])
-    axins.set_xticklabels(["$~1.0$", "$1.1$", "$1.2$", "$1.3$"])
-    axins.set_yticklabels(["$5.9~$", "$6.2~$"])
-    fig.savefig(W_clnks_free_rot_uniaxl_agreement_22_rves_plot_fig_filename)
-    plt.close()
-
     W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_plot_fig_filename = (
-        filepath + "W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_plot"
+        filepath
+        + "JMPS_2026_fig_12b_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_plot"
         + ".pdf"
     )
     fig, ax = plt.subplots()
-    plt_format_indx = 0
     handles = []
-    n_clnks_22_rves_legend = []
-    for clnk_indx in range_22_rves:
+    plt_format_indx = 0
+    for clnk_indx in n_clnks_22_rves_indcs:
         marker = clnk_marker[plt_format_indx]
         color = clnk_color[plt_format_indx]
-        W_clnk_frame_avrg_so3_quad_uniaxl = W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
-        W_clnk_frame_avrg_approx_so3_quad_uniaxl = W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        W_clnk_frame_avrg_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
+        )
+        W_clnk_frame_avrg_approx_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        )
         if marker == "+x":
             for plusx_marker in plusx_marker_list:
                 ax.scatter(
@@ -504,7 +569,6 @@ def main(cfg: DictConfig) -> None:
             approx_lmbda, W_clnk_frame_avrg_approx_so3_quad_uniaxl,
             linestyle="-", linewidth=markerlinewidth, c=color)
         handles.append((marker, color))
-        n_clnks_22_rves_legend.append(n_clnks_legend[clnk_indx])
         plt_format_indx += 1
     ax.legend(
         handles=handles, labels=n_clnks_22_rves_legend,
@@ -521,162 +585,55 @@ def main(cfg: DictConfig) -> None:
     ax.set_xticklabels(["$~0.5$", "$1$", "$1.5$", "$2$", "$2.5$", "$3$", "$3.5$", "$4$"])
     ax.set_yticklabels(["$5~$", "$10~$", "$15~$", "$20~$", "$25~$", "$30~$", "$35~$"])
     ax.set_xlabel("$\\lambda$", fontsize=16)
-    ax.set_ylabel("$W_{c, \\leftparen \\cdot \\rightparen }^{FA}/k_BT$", fontsize=16)
-    fig.tight_layout()
-    axins = inset_axes(
-        ax, width="100%", height="100%", bbox_to_anchor=(0.15, 0.40, 0.40, 0.325),
-        bbox_transform=ax.transAxes, loc="upper right")
-    exact_lmbda_axins_indcs = (
-        np.where(np.logical_and(exact_lmbda>=1.0, exact_lmbda<=1.3))[0]
-    )
-    approx_lmbda_axins_indcs = (
-        np.where(np.logical_and(approx_lmbda>=1.0, approx_lmbda<=1.3))[0]
-    )
+    ax.set_ylabel(
+        "$W_{c, \\leftparen \\cdot \\rightparen }^{FA}/k_BT$", fontsize=16)
+    inset_ax = ax.inset_axes([0.15, 0.40, 0.40, 0.325])
     plt_format_indx = 0
-    for clnk_indx in range_22_rves:
+    for clnk_indx in n_clnks_22_rves_indcs:
         marker = clnk_marker[plt_format_indx]
         color = clnk_color[plt_format_indx]
-        W_clnk_frame_avrg_so3_quad_uniaxl = W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
-        W_clnk_frame_avrg_approx_so3_quad_uniaxl = W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        W_clnk_frame_avrg_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]
+        )
+        W_clnk_frame_avrg_approx_so3_quad_uniaxl = (
+            W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]
+        )
         if marker == "+x":
             for plusx_marker in plusx_marker_list:
-                axins.scatter(
-                    exact_lmbda[exact_lmbda_axins_indcs],
-                    W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
-                    s=markersize, marker=plusx_marker,
-                    linewidth=markerlinewidth, facecolors=color, clip_on=False)
+                inset_ax.scatter(
+                    exact_lmbda[exact_lmbda_inset_ax_indcs],
+                    W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
+                    s=markersize, marker=plusx_marker, linewidth=markerlinewidth,
+                    facecolors=color, clip_on=False)
         else:
-            axins.scatter(
-                exact_lmbda[exact_lmbda_axins_indcs],
-                W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
+            inset_ax.scatter(
+                exact_lmbda[exact_lmbda_inset_ax_indcs],
+                W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
                 s=markersize, marker=marker, linewidth=markerlinewidth,
                 edgecolors=color, facecolors="None", clip_on=False)
-        axins.scatter(
-            exact_lmbda[exact_lmbda_axins_indcs],
-            W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_axins_indcs],
+        inset_ax.scatter(
+            exact_lmbda[exact_lmbda_inset_ax_indcs],
+            W_clnk_frame_avrg_so3_quad_uniaxl[exact_lmbda_inset_ax_indcs],
             s=dotsize, marker="o", linewidth=dotlinewidth, edgecolors=color,
             facecolors=color, clip_on=False)
-        axins.plot(
-            approx_lmbda[approx_lmbda_axins_indcs],
-            W_clnk_frame_avrg_approx_so3_quad_uniaxl[approx_lmbda_axins_indcs],
+        inset_ax.plot(
+            approx_lmbda[approx_lmbda_inset_ax_indcs],
+            W_clnk_frame_avrg_approx_so3_quad_uniaxl[approx_lmbda_inset_ax_indcs],
             linestyle="-", linewidth=markerlinewidth, c=color)
         plt_format_indx += 1
-    axins.set_xlim([1.0, 1.3])
-    axins.set_ylim([5.8, 6.4])
-    axins.tick_params(
+    inset_ax.set_xlim([lmbda_inset_ax_min, lmbda_inset_ax_max])
+    inset_ax.set_ylim([5.8, 6.4])
+    inset_ax.tick_params(
         bottom=True, top=True, left=True, right=True, direction="in",
         labelsize=12)
-    axins.set_xticks([1.0, 1.1, 1.2, 1.3])
-    axins.set_yticks([5.9, 6.2])
-    axins.set_xticklabels(["$~1.0$", "$1.1$", "$1.2$", "$1.3$"])
-    axins.set_yticklabels(["$5.9~$", "$6.2~$"])
+    inset_ax.set_xticks([1.0, 1.1, 1.2, 1.3])
+    inset_ax.set_yticks([5.9, 6.2])
+    inset_ax.set_xticklabels(["$~1$", "$1.1$", "$1.2$", "$1.3$"])
+    inset_ax.set_yticklabels(["$5.9~$", "$6.2~$"])
+    fig.tight_layout()
     fig.savefig(
         W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_plot_fig_filename)
     plt.close()
-
-    # # Save data in .csv files for plotting reproduction
-    # exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves_filename = (
-    #     filepath
-    #     + "exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves"
-    #     + ".csv"
-    # )
-    # approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves_filename = (
-    #     filepath
-    #     + "approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves"
-    #     + ".csv"
-    # )
-    # exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_filename = (
-    #     filepath
-    #     + "exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves"
-    #     + ".csv"
-    # )
-    # approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves_filename = (
-    #     filepath
-    #     + "approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves"
-    #     + ".csv"
-    # )
-    # exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves_filename = (
-    #     filepath
-    #     + "exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves"
-    #     + ".csv"
-    # )
-    # approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves_filename = (
-    #     filepath
-    #     + "approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves"
-    #     + ".csv"
-    # )
-    # exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_filename = (
-    #     filepath
-    #     + "exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves"
-    #     + ".csv"
-    # )
-    # approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves_filename = (
-    #     filepath
-    #     + "approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves"
-    #     + ".csv"
-    # )
-    
-    # exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves = exact_lmbda.copy()
-    # approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves = approx_lmbda.copy()
-    # exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves = exact_lmbda.copy()
-    # approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves = approx_lmbda.copy()
-    # exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves = exact_lmbda.copy()
-    # approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves = approx_lmbda.copy()
-    # exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves = exact_lmbda.copy()
-    # approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves = approx_lmbda.copy()
-    
-    # for clnk_indx in range_13_rves:
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves = np.column_stack(
-    #         (exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves, W_clnks_free_rot_uniaxl[clnk_indx]))
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves = np.column_stack(
-    #         (approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves, W_clnks_free_rot_approx_uniaxl[clnk_indx]))
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves = np.column_stack(
-    #         (exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves, W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]))
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves = np.column_stack(
-    #         (approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves, W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]))
-    
-    # for clnk_indx in range_22_rves:
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves = np.column_stack(
-    #         (exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves, W_clnks_free_rot_uniaxl[clnk_indx]))
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves = np.column_stack(
-    #         (approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves, W_clnks_free_rot_approx_uniaxl[clnk_indx]))
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves = np.column_stack(
-    #         (exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves, W_clnks_frame_avrg_so3_quad_uniaxl[clnk_indx]))
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves = np.column_stack(
-    #         (approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves, W_clnks_frame_avrg_approx_so3_quad_uniaxl[clnk_indx]))
-    
-    # np.savetxt(
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves_filename,
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_13_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves_filename,
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_13_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves_filename,
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_13_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves_filename,
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_13_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves_filename,
-    #     exact_lmbda_and_W_clnks_free_rot_uniaxl_agreement_22_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves_filename,
-    #     approx_lmbda_and_W_clnks_free_rot_approx_uniaxl_agreement_22_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves_filename,
-    #     exact_lmbda_and_W_clnks_frame_avrg_so3_quad_uniaxl_agreement_22_rves,
-    #     delimiter=",")
-    # np.savetxt(
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves_filename,
-    #     approx_lmbda_and_W_clnks_frame_avrg_so3_quad_approx_uniaxl_agreement_22_rves,
-    #     delimiter=",")
 
 if __name__ == "__main__":
     import time

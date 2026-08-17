@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-def A_func(u_hat: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+def A_func(u_hat: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Skew-symmetric tensor representation of the normalized Rodrigues
     vector.
 
@@ -9,10 +9,10 @@ def A_func(u_hat: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
     the normalized Rodrigues vector.
 
     Args:
-        u_hat (npt.NDArray[np.floating]): Normalized Rodrigues vector.
+        u_hat (npt.NDArray[np.float64]): Normalized Rodrigues vector.
 
     Returns:
-        npt.NDArray[np.floating]: Skew-symmetric tensor representation
+        npt.NDArray[np.float64]: Skew-symmetric tensor representation
         of the normalized Rodrigues vector.
     
     """
@@ -26,17 +26,17 @@ def A_func(u_hat: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
             ])
     )
 
-def Q_axis_angle(omega: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+def Q_axis_angle(omega: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Axis-Angle rotation matrix.
 
     This function generates the axis-angle rotation matrix from a
     Rodrigues vector.
 
     Args:
-        omega (npt.NDArray[np.floating]): Rodrigues vector.
+        omega (npt.NDArray[np.float64]): Rodrigues vector.
 
     Returns:
-        npt.NDArray[np.floating]: Axis-Angle rotation matrix.
+        npt.NDArray[np.float64]: Axis-Angle rotation matrix.
     
     """
     omega_norm = np.linalg.norm(omega)
@@ -49,7 +49,7 @@ def Q_axis_angle(omega: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
         )
     else: return np.eye(3)
 
-def R_x(gamma: float) -> npt.NDArray[np.floating]:
+def R_x(gamma: float) -> npt.NDArray[np.float64]:
     """Rotation matrix corresponding to a rotation in the x-plane.
 
     This function generates the rotation matrix corresponding to a
@@ -59,7 +59,7 @@ def R_x(gamma: float) -> npt.NDArray[np.floating]:
         gamma (float): Angle of rotation in the x-plane.
 
     Returns:
-        npt.NDArray[np.floating]: Rotation matrix corresponding to a
+        npt.NDArray[np.float64]: Rotation matrix corresponding to a
         rotation in the x-plane.
     
     """
@@ -72,7 +72,7 @@ def R_x(gamma: float) -> npt.NDArray[np.floating]:
             ])
     )
 
-def R_y(beta: float) -> npt.NDArray[np.floating]:
+def R_y(beta: float) -> npt.NDArray[np.float64]:
     """Rotation matrix corresponding to a rotation in the y-plane.
 
     This function generates the rotation matrix corresponding to a
@@ -82,7 +82,7 @@ def R_y(beta: float) -> npt.NDArray[np.floating]:
         beta (float): Angle of rotation in the y-plane.
 
     Returns:
-        npt.NDArray[np.floating]: Rotation matrix corresponding to a
+        npt.NDArray[np.float64]: Rotation matrix corresponding to a
         rotation in the y-plane.
     
     """
@@ -95,7 +95,7 @@ def R_y(beta: float) -> npt.NDArray[np.floating]:
             ])
     )
 
-def R_z(alpha: float) -> npt.NDArray[np.floating]:
+def R_z(alpha: float) -> npt.NDArray[np.float64]:
     """Rotation matrix corresponding to a rotation in the z-plane.
 
     This function generates the rotation matrix corresponding to a
@@ -105,7 +105,7 @@ def R_z(alpha: float) -> npt.NDArray[np.floating]:
         alpha (float): Angle of rotation in the z-plane.
 
     Returns:
-        npt.NDArray[np.floating]: Rotation matrix corresponding to a
+        npt.NDArray[np.float64]: Rotation matrix corresponding to a
         rotation in the z-plane.
     
     """
@@ -118,17 +118,17 @@ def R_z(alpha: float) -> npt.NDArray[np.floating]:
             ])
     ) 
 
-def Q_zyz_euler(omega: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+def Q_zyz_euler(omega: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """ZYZ Euler angle rotation matrix.
 
     This function generates the ZYZ Euler angle rotation matrix from a
     vector of Euler angles.
 
     Args:
-        omega (npt.NDArray[np.floating]): Vector of Euler angles.
+        omega (npt.NDArray[np.float64]): Vector of Euler angles.
 
     Returns:
-        npt.NDArray[np.floating]: ZYZ Euler angle rotation matrix.
+        npt.NDArray[np.float64]: ZYZ Euler angle rotation matrix.
     
     """
     phi, theta, psi = omega

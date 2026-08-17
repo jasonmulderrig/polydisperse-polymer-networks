@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 
 def uniaxial_F_func(
-        lmbda: float) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        lmbda: float) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Deformation gradient and the associated principal stretch matrix
     in the case of uniaxial deformation.
 
@@ -13,7 +13,7 @@ def uniaxial_F_func(
         lmbda (float): Uniaxial stretch state.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]: 
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]: 
         Deformation gradient and the associated principal stretch matrix
         in the case of uniaxial deformation.
     
@@ -23,7 +23,7 @@ def uniaxial_F_func(
     return F, Lmbda
 
 def simple_shear_F_func(
-        s: float) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        s: float) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Deformation gradient and the associated principal stretch matrix
     in the case of simple shear.
 
@@ -34,7 +34,7 @@ def simple_shear_F_func(
         s (float): Simple shear state.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]: 
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]: 
         Deformation gradient and the associated principal stretch matrix
         in the case of simple shear.
     
@@ -49,7 +49,7 @@ def simple_shear_F_func(
 
 def F_func(
         dfrmtn: str,
-        x: float) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        x: float) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Deformation gradient and the associated principal stretch matrix,
     given some mode of deformation.
 
@@ -61,7 +61,7 @@ def F_func(
         x (float): Deformation state.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]: 
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]: 
         Deformation gradient and the associated principal stretch
         matrix, given some mode of deformation.
     
@@ -74,32 +74,32 @@ def F_func(
         )
         raise NotImplementedError(error_str)
 
-def C_func(F: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+def C_func(F: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Right Cauchy-Green deformation tensor.
 
     This function returns the right Cauchy-Green deformation tensor.
 
     Args:
-        F (npt.NDArray[np.floating]): Deformation gradient.
+        F (npt.NDArray[np.float64]): Deformation gradient.
     
     Returns:
-        npt.NDArray[np.floating]: Right Cauchy-Green deformation tensor.
+        npt.NDArray[np.float64]: Right Cauchy-Green deformation tensor.
     
     """
     return np.matmul(np.transpose(F), F)
 
 def principal_stretch_decomposition(
-        F: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        F: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Principal stretch decomposition.
 
     This function performs a principal stretch decomposition to a given
     deformation gradient.
 
     Args:
-        F (npt.NDArray[np.floating]): Deformation gradient.
+        F (npt.NDArray[np.float64]): Deformation gradient.
     
     Returns:
-        npt.NDArray[np.floating]: Principal stretch matrix and
+        npt.NDArray[np.float64]: Principal stretch matrix and
         associated rotation matrix that diagonalizes the right stretch
         tensor to the principal stretch matrix.
     
@@ -109,7 +109,7 @@ def principal_stretch_decomposition(
     return Lmdba, P
 
 def deformation_protocol_init_func(
-        protocol_init: str, protocol: tuple[float]) -> npt.NDArray[np.floating]:
+        protocol_init: str, protocol: tuple[float]) -> npt.NDArray[np.float64]:
     """Deformation protocol.
 
     This function initializes the deformation protocol.
@@ -119,7 +119,7 @@ def deformation_protocol_init_func(
         protocol (tuple[float]): Deformation protocol, or information needed to properly initialize the deformation protocol.
     
     Returns:
-        npt.NDArray[np.floating]: Deformation protocol.
+        npt.NDArray[np.float64]: Deformation protocol.
     
     """
     if protocol_init == "explicit": return np.asarray(protocol)

@@ -2,52 +2,23 @@ import numpy as np
 import numpy.typing as npt
 from scipy.spatial import ConvexHull
 
-def n_clnk_mean_func(n_clnk: npt.NDArray[np.floating | np.integer]) -> float:
-    """Mean cross-link chain segment number.
-
-    This function returns the Mean cross-link chain segment number.
-
-    Args:
-        n_clnk (npt.NDArray[np.floating | np.integer]): Number of chain segments for each chain in the cross-link structure RVE.
-    
-    Returns:
-        float: Mean cross-link chain segment number.
-    
-    """
-    return np.mean(n_clnk)
-
-def n_clnk_geo_mean_func(n_clnk: npt.NDArray[np.floating | np.integer]) -> float:
-    """Geometric mean cross-link chain segment number.
-
-    This function returns the geometric mean cross-link chain segment
-    number.
-
-    Args:
-        n_clnk (npt.NDArray[np.floating | np.integer]): Number of chain segments for each chain in the cross-link structure RVE.
-    
-    Returns:
-        float: Geometric mean cross-link chain segment number.
-    
-    """
-    return np.power(np.prod(n_clnk), 1./np.shape(n_clnk)[0])
-
 def centroid_x_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        x_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Centroid of the cross-link chain ends.
 
     This function returns the centroid of the cross-link chain ends.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the cross-link structure RVE.
     
     Returns:
-        npt.NDArray[np.floating]: Centroid of the cross-link chain ends.
+        npt.NDArray[np.float64]: Centroid of the cross-link chain ends.
     
     """
     return np.mean(x_clnk, axis=0)
 
 def com_x_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        x_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Center-of-mass of the cross-link chain ends.
 
     This function returns the center-of-mass of the cross-link chain
@@ -57,17 +28,17 @@ def com_x_clnk_func(
     centroid of the cross-link chain ends.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the cross-link structure RVE.
     
     Returns:
-        npt.NDArray[np.floating]: Center-of-mass of the cross-link chain
+        npt.NDArray[np.float64]: Center-of-mass of the cross-link chain
         ends.
     
     """
     return centroid_x_clnk_func(x_clnk)
 
 def x_clnk_jog_min_max_3_chn_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        x_clnk: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Jogged minimum and maximum components of the chain ends in a
     3-chain cross-link structure RVE.
 
@@ -79,10 +50,10 @@ def x_clnk_jog_min_max_3_chn_clnk_func(
     x-, y-, or z-plane.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the 3-chain cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the 3-chain cross-link structure RVE.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Jogged minimum and maximum components of the chain ends in a
         3-chain cross-link structure RVE.
     
@@ -110,7 +81,7 @@ def x_clnk_jog_min_max_3_chn_clnk_func(
         raise ValueError(error_str)
 
 def x_clnk_min_max_func(
-        x_clnk: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        x_clnk: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Minimum and maximum components of the chain ends in a cross-link
     structure RVE.
 
@@ -118,10 +89,10 @@ def x_clnk_min_max_func(
     of the chain ends in a cross-link structure RVE.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the cross-link structure RVE.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Minimum and maximum components of the chain ends in a cross-link
         structure RVE.
     
@@ -131,7 +102,7 @@ def x_clnk_min_max_func(
     else: return np.min(x_clnk, axis=0), np.max(x_clnk, axis=0)
 
 def x_clnk_3_chn_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        x_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Vertices of the rectangular prism bounding the chain ends in a
     3-chain cross-link structure RVE.
 
@@ -139,10 +110,10 @@ def x_clnk_3_chn_clnk_func(
     prism bounding the chain ends in a 3-chain cross-link structure RVE.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the 3-chain cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the 3-chain cross-link structure RVE.
     
     Returns:
-        npt.NDArray[np.floating]: Vertices of the rectangular prism
+        npt.NDArray[np.float64]: Vertices of the rectangular prism
         bounding the chain ends in a 3-chain cross-link structure RVE.
     
     """
@@ -171,17 +142,17 @@ def x_clnk_3_chn_clnk_func(
         raise ValueError(error_str)
 
 def chull_eqs_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        x_clnk: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Convex hull of the cross-link structure.
 
     This function extracts and returns the convex hull of the cross-link
     structure via using the scipy.spatial.ConvexHull() function.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the cross-link structure RVE.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]: ``A''
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]: ``A''
         matrix (2D array) and ``b'' vector (1D array) of coefficients
         involved in the equations that define the planes that altogether
         define the convex hull of the cross-link structure.
@@ -196,7 +167,7 @@ def chull_eqs_clnk_func(
     return chull_eqs_clnk[:, :-1], -chull_eqs_clnk[:, -1]
 
 def x_hat_clnk_func(
-        x_clnk: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        x_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Unit chain end position for each chain in the cross-link
     structure RVE.
 
@@ -204,10 +175,10 @@ def x_hat_clnk_func(
     the cross-link structure RVE.
 
     Args:
-        x_clnk (npt.NDArray[np.floating]): Chain end position for each chain in the cross-link structure RVE.
+        x_clnk (npt.NDArray[np.float64]): Chain end position for each chain in the cross-link structure RVE.
     
     Returns:
-        npt.NDArray[np.floating]: Unit chain end position for each chain
+        npt.NDArray[np.float64]: Unit chain end position for each chain
         in the cross-link structure RVE.
     
     """
@@ -218,7 +189,7 @@ def x_hat_clnk_func(
         )
     return x_hat_clnk
 
-def classical_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def classical_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the classical
     3-chain cross-link structure RVE.
     
@@ -226,13 +197,13 @@ def classical_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     chain in the classical 3-chain cross-link structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the classical 3-chain cross-link structure RVE.
     
     """
     return np.eye(3)
 
-def amended_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def amended_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the amended
     3-chain cross-link structure RVE.
     
@@ -240,7 +211,7 @@ def amended_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     chain in the amended 3-chain cross-link structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the amended 3-chain cross-link structure RVE.
     
     """
@@ -248,7 +219,7 @@ def amended_3_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     np.fill_diagonal(X_hat_clnk, np.sqrt(2./3.))
     return X_hat_clnk
 
-def regular_tetrahedral_4_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def regular_tetrahedral_4_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the classical
     regular tetrahedral 4-chain cross-link structure RVE.
     
@@ -257,7 +228,7 @@ def regular_tetrahedral_4_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]
     structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the classical regular tetrahedral 4-chain
         cross-link structure RVE.
     
@@ -272,7 +243,7 @@ def regular_tetrahedral_4_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]
             ])
     )
 
-def equilateral_triangular_bipyramidal_5_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def equilateral_triangular_bipyramidal_5_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the equilateral
     triangular bipyramidal 5-chain cross-link structure RVE.
     
@@ -281,7 +252,7 @@ def equilateral_triangular_bipyramidal_5_chn_clnk_X_hat_clnk_func() -> npt.NDArr
     structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the equilateral triangular bipyramidal 5-chain
         cross-link structure RVE.
     
@@ -297,7 +268,7 @@ def equilateral_triangular_bipyramidal_5_chn_clnk_X_hat_clnk_func() -> npt.NDArr
             ])
     )
 
-def regular_octahedral_6_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def regular_octahedral_6_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the classical
     regular octahedral 6-chain cross-link structure RVE.
     
@@ -306,7 +277,7 @@ def regular_octahedral_6_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the classical regular octahedral 6-chain
         cross-link structure RVE.
     
@@ -318,7 +289,7 @@ def regular_octahedral_6_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
         else: X_hat_clnk[chn_indx] = -e_hat[chn_indx-3]
     return X_hat_clnk
 
-def equilateral_pentagonal_bipyramidal_7_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def equilateral_pentagonal_bipyramidal_7_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the equilateral
     pentagonal bipyramidal 7-chain cross-link structure RVE.
     
@@ -327,7 +298,7 @@ def equilateral_pentagonal_bipyramidal_7_chn_clnk_X_hat_clnk_func() -> npt.NDArr
     structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the equilateral pentagonal bipyramidal 7-chain
         cross-link structure RVE.
     
@@ -345,7 +316,7 @@ def equilateral_pentagonal_bipyramidal_7_chn_clnk_X_hat_clnk_func() -> npt.NDArr
             ])
     )
 
-def cube_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def cube_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the classical
     cube 8-chain cross-link structure RVE.
     
@@ -353,7 +324,7 @@ def cube_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     chain in the classical cube 8-chain cross-link structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the classical cube 8-chain cross-link structure
         RVE.
     
@@ -362,7 +333,7 @@ def cube_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
         1. / np.sqrt(3.) * (1-2*np.transpose(np.indices((2,)*3).reshape(3, -1)))
     )
 
-def square_antiprism_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
+def square_antiprism_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.float64]:
     """Initial unit chain end position for each chain in the square
     anti-prism 8-chain cross-link structure RVE.
     
@@ -370,7 +341,7 @@ def square_antiprism_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     chain in the square anti-prism 8-chain cross-link structure RVE.
 
     Returns:
-        npt.NDArray[np.floating]: Initial unit chain end position for
+        npt.NDArray[np.float64]: Initial unit chain end position for
         each chain in the square anti-prism 8-chain cross-link structure
         RVE.
     
@@ -390,8 +361,8 @@ def square_antiprism_8_chn_clnk_X_hat_clnk_func() -> npt.NDArray[np.floating]:
     return X_hat_clnk
 
 def X_clnk_func(
-        X_hat_clnk: npt.NDArray[np.floating],
-        r: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        X_hat_clnk: npt.NDArray[np.float64],
+        r: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Initial chain end position for each chain in the cross-link
     structure RVE.
 
@@ -399,11 +370,11 @@ def X_clnk_func(
     for each chain in the cross-link structure RVE.
 
     Args:
-        X_hat_clnk (npt.NDArray[np.floating]): Initial unit chain end position for each chain in the cross-link structure RVE.
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the cross-link structure RVE.
+        X_hat_clnk (npt.NDArray[np.float64]): Initial unit chain end position for each chain in the cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the cross-link structure RVE.
     
     Returns:
-        npt.NDArray[np.floating]: Initial chain end position for each
+        npt.NDArray[np.float64]: Initial chain end position for each
         chain in the cross-link structure RVE.
     
     """
@@ -415,7 +386,7 @@ def X_clnk_func(
         raise ValueError(error_str)
     return X_hat_clnk * r[:, np.newaxis]
 
-def omega_clnk_init_func() -> npt.NDArray[np.floating]:
+def omega_clnk_init_func() -> npt.NDArray[np.float64]:
     """Initial Rodrigues vector describing the initial rotation of the
     cross-link structure RVE, i.e., the zero Rodrigues vector.
 
@@ -431,7 +402,7 @@ def omega_clnk_init_func() -> npt.NDArray[np.floating]:
     """
     return np.zeros(3)
 
-def y_clnk_init_func() -> npt.NDArray[np.floating]:
+def y_clnk_init_func() -> npt.NDArray[np.float64]:
     """Initial cross-link junction position for the cross-link structure
     RVE, i.e., the origin.
 
@@ -446,17 +417,17 @@ def y_clnk_init_func() -> npt.NDArray[np.floating]:
     return np.zeros(3)
 
 def classical_3_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Classical 3-chain cross-link structure RVE initialization.
     
     This function initializes the classical 3-chain cross-link structure
     RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the classical 3-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the classical 3-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the classical
         3-chain cross-link structure RVE, initial Rodrigues vector
         describing the initial rotation (i.e., the zero Rodrigues
@@ -470,17 +441,17 @@ def classical_3_chn_clnk_init_func(
     )
 
 def amended_3_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Amended 3-chain cross-link structure RVE initialization.
     
     This function initializes the amended 3-chain cross-link structure
     RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the amended 3-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the amended 3-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the amended 3-chain
         cross-link structure RVE, initial Rodrigues vector describing
         the initial rotation (i.e., the zero Rodrigues vector), and
@@ -493,7 +464,7 @@ def amended_3_chn_clnk_init_func(
     )
 
 def regular_tetrahedral_4_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Classical regular tetrahedral 4-chain cross-link structure RVE
     initialization.
     
@@ -501,10 +472,10 @@ def regular_tetrahedral_4_chn_clnk_init_func(
     cross-link structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the classical regular tetrahedral 4-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the classical regular tetrahedral 4-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the classical
         regular tetrahedral 4-chain cross-link structure RVE, initial
         Rodrigues vector describing the initial rotation (i.e., the zero
@@ -518,7 +489,7 @@ def regular_tetrahedral_4_chn_clnk_init_func(
     )
 
 def equilateral_triangular_bipyramidal_5_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Equilateral triangular bipyramidal 5-chain cross-link structure
     RVE initialization.
     
@@ -526,10 +497,10 @@ def equilateral_triangular_bipyramidal_5_chn_clnk_init_func(
     5-chain cross-link structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the equilateral triangular bipyramidal 5-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the equilateral triangular bipyramidal 5-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the equilateral
         triangular bipyramidal 5-chain cross-link structure RVE, initial
         Rodrigues vector describing the initial rotation (i.e., the zero
@@ -543,7 +514,7 @@ def equilateral_triangular_bipyramidal_5_chn_clnk_init_func(
     )
 
 def regular_octahedral_6_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Classical regular octahedral 6-chain cross-link structure RVE
     initialization.
     
@@ -551,10 +522,10 @@ def regular_octahedral_6_chn_clnk_init_func(
     cross-link structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the classical regular octahedral 6-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the classical regular octahedral 6-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the classical
         regular octahedral 6-chain cross-link structure RVE, initial
         Rodrigues vector describing the initial rotation (i.e., the zero
@@ -568,7 +539,7 @@ def regular_octahedral_6_chn_clnk_init_func(
     )
 
 def equilateral_pentagonal_bipyramidal_7_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Equilateral pentagonal bipyramidal 7-chain cross-link structure
     RVE initialization.
     
@@ -576,10 +547,10 @@ def equilateral_pentagonal_bipyramidal_7_chn_clnk_init_func(
     7-chain cross-link structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the equilateral pentagonal bipyramidal 7-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the equilateral pentagonal bipyramidal 7-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the equilateral
         pentagonal bipyramidal 7-chain cross-link structure RVE, initial
         Rodrigues vector describing the initial rotation (i.e., the zero
@@ -593,17 +564,17 @@ def equilateral_pentagonal_bipyramidal_7_chn_clnk_init_func(
     )
 
 def cube_8_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Classical cube 8-chain cross-link structure RVE initialization.
     
     This function initializes the classical cube 8-chain cross-link
     structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the classical cube 8-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the classical cube 8-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the classical cube
         8-chain cross-link structure RVE, initial Rodrigues vector
         describing the initial rotation (i.e., the zero Rodrigues
@@ -617,17 +588,17 @@ def cube_8_chn_clnk_init_func(
     )
 
 def square_antiprism_8_chn_clnk_init_func(
-        r: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Square anti-prism 8-chain cross-link structure RVE initialization.
     
     This function initializes the square anti-prism 8-chain cross-link
     structure RVE.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the square anti-prism 8-chain cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the square anti-prism 8-chain cross-link structure RVE.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the square
         anti-prism 8-chain cross-link structure RVE, initial Rodrigues
         vector describing the initial rotation (i.e., the zero Rodrigues
@@ -641,8 +612,8 @@ def square_antiprism_8_chn_clnk_init_func(
     )
 
 def recommended_clnk_init_func(
-        r: npt.NDArray[np.floating],
-        type_8_chn_clnk: str) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        r: npt.NDArray[np.float64],
+        type_8_chn_clnk: str) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Recommended cross-link structure RVE initialization.
     
     This function initializes the recommended cross-link structure RVE,
@@ -650,11 +621,11 @@ def recommended_clnk_init_func(
     initial end-to-end chain distance/length.
 
     Args:
-        r (npt.NDArray[np.floating]): Initial end-to-end chain distance/length for each chain in the cross-link structure RVE.
+        r (npt.NDArray[np.float64]): Initial end-to-end chain distance/length for each chain in the cross-link structure RVE.
         type_8_chn_clnk (str): String indicating which 8-chain cross-link structure RVE to initialize; either the classical cube ("cube") or the square anti-prism ("square_antiprism") 8-chain cross-link structure RVEs are accepted.
 
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         Initial chain end position for each chain in the recommended
         cross-link structure RVE, initial Rodrigues vector describing
         the initial rotation (i.e., the zero Rodrigues vector), and
@@ -675,7 +646,7 @@ def recommended_clnk_init_func(
             return square_antiprism_8_chn_clnk_init_func(r)
 
 def recommended_X_hat_clnks_func(
-        type_8_chn_clnk: str) -> list[npt.NDArray[np.floating]]:
+        type_8_chn_clnk: str) -> list[npt.NDArray[np.float64]]:
     """Recommended unit cross-link structure RVEs initialization.
     
     This function initializes the recommended 3-chain, 4-chain, ...,
@@ -685,7 +656,7 @@ def recommended_X_hat_clnks_func(
         type_8_chn_clnk (str): String indicating which 8-chain unit cross-link structure RVE to initialize; either the classical cube ("cube") or the square anti-prism ("square_antiprism") 8-chain cross-link structure RVEs are accepted.
 
     Returns:
-        list[npt.NDArray[np.floating]]:
+        list[npt.NDArray[np.float64]]:
         Initial unit chain end position for each chain in each of the
         recommended 3-chain, 4-chain, ..., 8-chain unit cross-link
         structure RVEs.

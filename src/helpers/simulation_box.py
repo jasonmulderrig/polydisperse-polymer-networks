@@ -2,14 +2,14 @@ import numpy as np
 import numpy.typing as npt
 from src.helpers.network import a_or_v_func
 
-def A_or_V_arg_L_func(L: npt.NDArray[np.floating]) -> float:
+def A_or_V_arg_L_func(L: npt.NDArray[np.float64]) -> float:
     """Simulation box area or volume.
 
     This function calculates the simulation box area or volume given the
     simulation box side lengths.
 
     Args:
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the simulation box side lengths.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the simulation box side lengths.
 
     Returns:
         float: Simulation box area or volume.
@@ -51,7 +51,7 @@ def A_or_V_arg_eta_func(dim: int, b: float, en: float, eta: float) -> float:
     """
     return a_or_v_func(dim, b) * en / eta
 
-def L_arg_A_or_V_func(dim: int, A_or_V: float) -> npt.NDArray[np.floating]:
+def L_arg_A_or_V_func(dim: int, A_or_V: float) -> npt.NDArray[np.float64]:
     """Simulation box side lengths.
     
     This function calculates the simulation box side lengths given the
@@ -64,13 +64,13 @@ def L_arg_A_or_V_func(dim: int, A_or_V: float) -> npt.NDArray[np.floating]:
         A_or_V (float): Simulation box area or volume.
 
     Returns:
-        npt.NDArray[np.floating]: 1D array with dim float entries of the
+        npt.NDArray[np.float64]: 1D array with dim float entries of the
         simulation box side lengths.
     
     """
     return np.repeat(np.power(A_or_V, np.reciprocal(1.0*dim)), dim)
 
-def L_arg_rho_func(dim: int, en: float, rho: float) -> npt.NDArray[np.floating]:
+def L_arg_rho_func(dim: int, en: float, rho: float) -> npt.NDArray[np.float64]:
     """Simulation box side lengths.
     
     This function calculates the simulation box side lengths given the
@@ -84,7 +84,7 @@ def L_arg_rho_func(dim: int, en: float, rho: float) -> npt.NDArray[np.floating]:
         rho (float): Particle number density.
 
     Returns:
-        npt.NDArray[np.floating]: 1D array with dim float entries of the
+        npt.NDArray[np.float64]: 1D array with dim float entries of the
         simulation box side lengths.
     
     """
@@ -94,7 +94,7 @@ def L_arg_eta_func(
         dim: int,
         b: float,
         en: float,
-        eta: float) -> npt.NDArray[np.floating]:
+        eta: float) -> npt.NDArray[np.float64]:
     """Simulation box side lengths.
     
     This function calculates the simulation box side lengths given the
@@ -109,15 +109,15 @@ def L_arg_eta_func(
         eta (float): Particle packing density.
 
     Returns:
-        npt.NDArray[np.floating]: 1D array with dim float entries of the
+        npt.NDArray[np.float64]: 1D array with dim float entries of the
         simulation box side lengths.
     
     """
     return L_arg_A_or_V_func(dim, A_or_V_arg_eta_func(dim, b, en, eta))
 
 def mic_func(
-        coords: npt.NDArray[np.floating],
-        L: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        coords: npt.NDArray[np.float64],
+        L: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Minimum image criterion.
     
     This function modifies a provided coordinates array to satisfy the
@@ -125,11 +125,11 @@ def mic_func(
     lengths L.
 
     Args:
-        coords (npt.NDArray[np.floating]): 2D array with (en, dim) float entries of coordinates.
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the simulation box side lengths.
+        coords (npt.NDArray[np.float64]): 2D array with (en, dim) float entries of coordinates.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the simulation box side lengths.
 
     Returns:
-        npt.NDArray[np.floating]: Coordinates that satisfy the minimum
+        npt.NDArray[np.float64]: Coordinates that satisfy the minimum
         image criterion.
     
     """
@@ -138,13 +138,13 @@ def mic_func(
         coords = np.where(coords>=L, coords-L, coords)
     return coords
 
-def L_min_func(L: npt.NDArray[np.floating]) -> float:
+def L_min_func(L: npt.NDArray[np.float64]) -> float:
     """Minimum simulation box length.
     
     This function calculates the minimum simulation box length.
 
     Args:
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the simulation box side lengths.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the simulation box side lengths.
 
     Returns:
         float: Minimum simulation box length.
@@ -152,13 +152,13 @@ def L_min_func(L: npt.NDArray[np.floating]) -> float:
     """
     return np.min(L)
 
-def L_max_func(L: npt.NDArray[np.floating]) -> float:
+def L_max_func(L: npt.NDArray[np.float64]) -> float:
     """Maximum simulation box length.
     
     This function calculates the maximum simulation box length.
 
     Args:
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the simulation box side lengths.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the simulation box side lengths.
 
     Returns:
         float: Maximum simulation box length.
@@ -166,13 +166,13 @@ def L_max_func(L: npt.NDArray[np.floating]) -> float:
     """
     return np.max(L)
 
-def L_diag_max_func(L: npt.NDArray[np.floating]) -> float:
+def L_diag_max_func(L: npt.NDArray[np.float64]) -> float:
     """Maximum simulation box diagonal length.
     
     This function calculates the maximum simulation box diagonal length.
 
     Args:
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the simulation box side lengths.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the simulation box side lengths.
 
     Returns:
         float: Maximum simulation box diagonal length.
@@ -180,7 +180,7 @@ def L_diag_max_func(L: npt.NDArray[np.floating]) -> float:
     """
     return np.sqrt(np.sum(L**2))
 
-def tessellation_protocol(dim: int) -> tuple[npt.NDArray[np.integer], int]:
+def tessellation_protocol(dim: int) -> tuple[npt.NDArray[np.int64], int]:
     """Tessellation protocol.
 
     This function determines the tessellation protocol and the number of
@@ -191,7 +191,7 @@ def tessellation_protocol(dim: int) -> tuple[npt.NDArray[np.integer], int]:
         dim (int): Physical dimensionality of the network; either 2 or 3 (for two-dimensional or three-dimensional networks).
     
     Returns:
-        tuple[npt.NDArray[np.integer], int]: 2D array with (3**dim, dim)
+        tuple[npt.NDArray[np.int64], int]: 2D array with (3**dim, dim)
         int entries representing the tessellation protocol and the
         number of tessellations involved in that protocol, respectively.
     
@@ -203,9 +203,9 @@ def tessellation_protocol(dim: int) -> tuple[npt.NDArray[np.integer], int]:
     return tsslltn, np.shape(tsslltn)[0]
 
 def tessellation(
-        coords: npt.NDArray[np.floating],
-        tsslltn: npt.NDArray[np.integer],
-        L: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        coords: npt.NDArray[np.float64],
+        tsslltn: npt.NDArray[np.int64],
+        L: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Tessellation.
     
     This function fully tessellates (or translates) an arbitrary
@@ -213,12 +213,12 @@ def tessellation(
     scaling L.
 
     Args:
-        coords (npt.NDArray[np.floating]): 2D array with (en, dim) float entries of the coordinates to be tessellated.
-        tsslltn (npt.NDArray[np.integer]): 2Darray with (3**dim, dim) int entries representing the tessellation protocol.
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the tessellation scaling.
+        coords (npt.NDArray[np.float64]): 2D array with (en, dim) float entries of the coordinates to be tessellated.
+        tsslltn (npt.NDArray[np.int64]): 2Darray with (3**dim, dim) int entries representing the tessellation protocol.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the tessellation scaling.
     
     Returns:
-        npt.NDArray[np.floating]: 2D array with (en*3**dim, dim) float
+        npt.NDArray[np.float64]: 2D array with (en*3**dim, dim) float
         entries of the tessellated coordinates.
     
     """
@@ -226,9 +226,9 @@ def tessellation(
 
 def core_clnkr_tessellation(
         dim: int,
-        core_clnkrs: npt.NDArray[np.integer],
-        core_coords: npt.NDArray[np.floating],
-        L: npt.NDArray[np.floating]) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]:
+        core_clnkrs: npt.NDArray[np.int64],
+        core_coords: npt.NDArray[np.float64],
+        L: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.int64]]:
     """Core cross-linker tessellation.
     
     This function fully tessellates (or translates) an arbitrary set of
@@ -241,12 +241,12 @@ def core_clnkr_tessellation(
 
     Args:
         dim (int): Physical dimensionality of the network; either 2 or 3 (for two-dimensional or three-dimensional networks).
-        core_clnkrs (npt.NDArray[np.integer]): 1D array with en int entries of the core cross-linkers.
-        core_coords (npt.NDArray[np.floating]): 2D array with (en, dim) float entries of the core cross-linker coordinates to be tessellated.
-        L (npt.NDArray[np.floating]): 1D array with dim float entries of the tessellation scaling.
+        core_clnkrs (npt.NDArray[np.int64]): 1D array with en int entries of the core cross-linkers.
+        core_coords (npt.NDArray[np.float64]): 2D array with (en, dim) float entries of the core cross-linker coordinates to be tessellated.
+        L (npt.NDArray[np.float64]): 1D array with dim float entries of the tessellation scaling.
     
     Returns:
-        tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]: 2D
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.int64]]: 2D
         array with (en*3**dim, dim) float entries of the tessellated
         cross-linker coordinates and 1D array with en*3**dim int entries
         that returns the core cross-linker that corresponds to each core
@@ -289,8 +289,8 @@ def core_clnkr_tessellation(
         return tsslltd_core_coords, pb_to_core_clnkrs
 
 def core_to_pb_clnkrs_func(
-        core_clnkrs: npt.NDArray[np.integer],
-        pb_to_core_clnkrs: npt.NDArray[np.integer]) -> list[npt.NDArray[np.integer]]:
+        core_clnkrs: npt.NDArray[np.int64],
+        pb_to_core_clnkrs: npt.NDArray[np.int64]) -> list[npt.NDArray[np.int64]]:
     """List of np.ndarrays corresponding to the periodic boundary
     cross-linkers associated with a particular core cross-linker.
 
@@ -299,11 +299,11 @@ def core_to_pb_clnkrs_func(
     cross-linker such that core_to_pb_clnkrs[core_clnkr] = pb_clnkrs.
 
     Args:
-        core_clnkrs (npt.NDArray[np.integer]): 1D array with en int entries of the core cross-linkers.
-        pb_to_core_clnkrs (npt.NDArray[np.integer]): 1D array with en*3**dim int entries that returns the core cross-linker that corresponds to each core and periodic boundary cross-linker, i.e., pb_to_core_clnkrs[core_pb_clnkr] = core_clnkr.
+        core_clnkrs (npt.NDArray[np.int64]): 1D array with en int entries of the core cross-linkers.
+        pb_to_core_clnkrs (npt.NDArray[np.int64]): 1D array with en*3**dim int entries that returns the core cross-linker that corresponds to each core and periodic boundary cross-linker, i.e., pb_to_core_clnkrs[core_pb_clnkr] = core_clnkr.
     
     Returns:
-        list[npt.NDArray[np.integer]]: List of 1D arrays with int
+        list[npt.NDArray[np.int64]]: List of 1D arrays with int
         entries corresponding to the periodic boundary cross-linkers
         associated with a particular core cross-linker.
 
@@ -318,10 +318,10 @@ def core_to_pb_clnkrs_func(
 
 def box_neighborhood_id(
         dim: int,
-        coords: npt.NDArray[np.floating],
-        coord: npt.NDArray[np.floating],
+        coords: npt.NDArray[np.float64],
+        coord: npt.NDArray[np.float64],
         l: float,
-        inclusive: bool) -> tuple[npt.NDArray[np.integer], int]:
+        inclusive: bool) -> tuple[npt.NDArray[np.int64], int]:
     """Box neighborhood identification.
     
     This function return the coordinates or the indices of the
@@ -330,13 +330,13 @@ def box_neighborhood_id(
 
     Args:
         dim (int): Physical dimensionality of the network; either 2 or 3 (for two-dimensional or three-dimensional networks).
-        coords (npt.NDArray[np.floating]): 2D array of (en, dim) float entries of coordinates that may or may not reside in the box neighborhood.
-        coord (npt.NDArray[np.floating]): 1D array of dim float entries of a given coordinate which the box neighborhood is defined about.
+        coords (npt.NDArray[np.float64]): 2D array of (en, dim) float entries of coordinates that may or may not reside in the box neighborhood.
+        coord (npt.NDArray[np.float64]): 1D array of dim float entries of a given coordinate which the box neighborhood is defined about.
         l (float): Half-side length defining the box neighborhood about the given coordinate.
         inclusive (bool): Boolean indicating if the box neighborhood is inclusive or exclusive of its boundary.
     
     Returns:
-        tuple[npt.NDArray[np.integer], int]: 1D array of en int entries
+        tuple[npt.NDArray[np.int64], int]: 1D array of en int entries
         of box neighbor indices and the number of box neighbors.
 
     """
@@ -395,10 +395,10 @@ def box_neighborhood_id(
 
 def orb_neighborhood_id(
         dim: int,
-        coords: npt.NDArray[np.floating],
-        coord: npt.NDArray[np.floating],
+        coords: npt.NDArray[np.float64],
+        coord: npt.NDArray[np.float64],
         r: float,
-        inclusive: bool) -> tuple[npt.NDArray[np.integer], int]:
+        inclusive: bool) -> tuple[npt.NDArray[np.int64], int]:
     """Orb neighborhood identification.
 
     This function identifies which coordinates lie within an orb
@@ -406,13 +406,13 @@ def orb_neighborhood_id(
 
     Args:
         dim (int): Physical dimensionality of the network; either 2 or 3 (for two-dimensional or three-dimensional networks).
-        coords (npt.NDArray[np.floating]): 2D array of (en, dim) float entries of coordinates that may or may not reside in the orb neighborhood.
-        coord (npt.NDArray[np.floating]): 1D array of dim float entries of a given coordinate which the orb neighborhood is defined about.
+        coords (npt.NDArray[np.float64]): 2D array of (en, dim) float entries of coordinates that may or may not reside in the orb neighborhood.
+        coord (npt.NDArray[np.float64]): 1D array of dim float entries of a given coordinate which the orb neighborhood is defined about.
         r (float): Radius defining the orb neighborhood about the given coordinate.
         inclusive (bool): Boolean indicating if the orb neighborhood is inclusive or exclusive of its boundary.
     
     Returns:
-        tuple[npt.NDArray[np.integer], int]: 1D array of en int entries
+        tuple[npt.NDArray[np.int64], int]: 1D array of en int entries
         of orb neighbor indices, and the number of orb neighbors.
 
     """

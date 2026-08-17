@@ -1,9 +1,0 @@
-defaults:
-  - topology: 20260204B
-  - deformation: 20260204B
-  - _self_
-label:
-  workdir: clnk_rves
-  date: !!str 20260204
-  batch: B
-  sample: 0

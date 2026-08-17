@@ -1,0 +1,20 @@
+n:
+  -
+    - 25.
+    - 125.
+n_init: explicit
+p_n_dist: bimodal
+p_n_args:
+  -
+    -
+      - 0.5
+    -
+      - 25.
+      - 125.
+f: 4
+b: 1.
+kappa_n: 0.
+zeta_n_char: 0.
+w_c_dist: inext_kuhn_grun_fjc
+w_c_dfrmtn_dist: log_barrier_clnk_vol_pnlty
+type_8_chn_clnk: cube

@@ -5,7 +5,7 @@ from pylimer_tools.calc.miller_macosko_theory import (
     compute_probability_that_crosslink_is_effective
 )
 
-def k_init_func(f: int) -> npt.NDArray[np.integer]:
+def k_init_func(f: int) -> npt.NDArray[np.int64]:
     """Elastically-effective cross-link degree.
 
     This function gathers the degree of all elastically-effective
@@ -15,7 +15,7 @@ def k_init_func(f: int) -> npt.NDArray[np.integer]:
         f (int): Maximum cross-linker degree/functionality.
     
     Returns:
-        npt.NDArray[np.integer]: Degree of all elastically-effective
+        npt.NDArray[np.int64]: Degree of all elastically-effective
         cross-links that exist in a polymer network.
     
     """
@@ -47,8 +47,8 @@ def p_finite_clnkr_out_func(chi: float, xi: float, f: int) -> float:
 
 def p_k_clnks_init_func(
         f: int,
-        k: npt.NDArray[np.integer],
-        p_finite_clnkr_out: float) -> npt.NDArray[np.floating]:
+        k: npt.NDArray[np.int64],
+        p_finite_clnkr_out: float) -> npt.NDArray[np.float64]:
     """Probability distribution that a randomly chosen cross-link with
     maximum cross-linker degree/functionality f is an
     elastically-effective cross-link with degree k.
@@ -60,11 +60,11 @@ def p_k_clnks_init_func(
 
     Args:
         f (int): Maximum cross-linker degree/functionality.
-        k (npt.NDArray[np.integer]): Elastically-effective cross-link degree.
+        k (npt.NDArray[np.int64]): Elastically-effective cross-link degree.
         p_finite_clnkr_out (float): Probability that a randomly chosen cross-link is the start of a finite chain, i.e., that a randomly chosen cross-link is elastically-effective.
    
     Returns:
-        npt.NDArray[np.floating]: Probability distribution that a
+        npt.NDArray[np.float64]: Probability distribution that a
         randomly chosen cross-link with maximum cross-linker
         degree/functionality f is an elastically-effective cross-link
         with degree k.

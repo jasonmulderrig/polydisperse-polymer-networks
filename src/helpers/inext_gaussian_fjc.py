@@ -103,23 +103,23 @@ def xi_c_func(gamma: npt.ArrayLike) -> npt.ArrayLike:
     return 3. * gamma
 
 def xi_c_vec_func(
-        gamma_vec: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        gamma_vec: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Nondimensional chain force vector.
     
     This function returns the nondimensional chain force vector.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional chain force vector.
+        npt.NDArray[np.float64]: Nondimensional chain force vector.
     
     """
     return xi_c_func(gamma_vec)
 
 def dw_c__dy_clnk_func(
-        gamma_vec: npt.NDArray[np.floating],
-        gamma: float) -> npt.NDArray[np.floating]:
+        gamma_vec: npt.NDArray[np.float64],
+        gamma: float) -> npt.NDArray[np.float64]:
     """Nondimensional derivative of the polymer chain free energy with
     respect to the cross-link junction position for a chain in the
     cross-link structure RVE.
@@ -129,11 +129,11 @@ def dw_c__dy_clnk_func(
     for a chain in the cross-link structure RVE.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
         gamma (float): Absolute/Equilibrium chain stretch.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional derivative of the
+        npt.NDArray[np.float64]: Nondimensional derivative of the
         polymer chain free energy with respect to the cross-link
         junction position for a chain in the cross-link structure RVE.
     
@@ -141,9 +141,9 @@ def dw_c__dy_clnk_func(
     return -xi_c_vec_func(gamma_vec)
 
 def d2w_c__dy_clnk_dy_clnk_func(
-        gamma_vec: npt.NDArray[np.floating],
+        gamma_vec: npt.NDArray[np.float64],
         gamma: float,
-        n: float | int) -> npt.NDArray[np.floating]:
+        n: float) -> npt.NDArray[np.float64]:
     """Nondimensional second derivative of the polymer chain free energy
     with respect to the cross-link junction position for a chain in the
     cross-link structure RVE.
@@ -153,12 +153,12 @@ def d2w_c__dy_clnk_dy_clnk_func(
     position for a chain in the cross-link structure RVE.
 
     Args:
-        gamma_vec (npt.NDArray[np.floating]): Absolute/Equilibrium chain stretch vector.
+        gamma_vec (npt.NDArray[np.float64]): Absolute/Equilibrium chain stretch vector.
         gamma (float): Absolute/Equilibrium chain stretch.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
     
     Returns:
-        npt.NDArray[np.floating]: Nondimensional second derivative of
+        npt.NDArray[np.float64]: Nondimensional second derivative of
         the polymer chain free energy with respect to the cross-link
         junction position for a chain in the cross-link structure RVE.
     

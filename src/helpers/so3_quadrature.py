@@ -5,7 +5,7 @@ from src.helpers.spherical_coordinates import cartesian_to_spherical_coords
 
 def master_so3_quadrature_func(
         sph_quad_method: str,
-        num_spin_inc: int) -> tuple[npt.NDArray[np.floating], bool]:
+        num_spin_inc: int) -> tuple[npt.NDArray[np.float64], bool]:
     """Master SO(3) quadrature function.
 
     This function returns the selected SO(3) quadrature scheme.
@@ -15,7 +15,7 @@ def master_so3_quadrature_func(
         num_spin_inc (int): Number of discretization points for the spin rotation.
     
     Returns:
-        tuple[npt.NDArray[np.floating], bool]: SO(3) quadrature scheme,
+        tuple[npt.NDArray[np.float64], bool]: SO(3) quadrature scheme,
         boolean indicating if the SO(3) quadrature scheme is
         hemispherically symmetric.
     

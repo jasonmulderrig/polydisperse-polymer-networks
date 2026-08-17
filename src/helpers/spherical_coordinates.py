@@ -2,17 +2,17 @@ import numpy as np
 import numpy.typing as npt
 
 def cartesian_to_spherical_coords(
-        x_y_z: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        x_y_z: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Cartesian-to-spherical coordinates transformation.
 
     This function transforms Cartesian coordinates to spherical
     coordinates.
 
     Args:
-        x_y_z (npt.NDArray[np.floating]): Cartesian coordinates.
+        x_y_z (npt.NDArray[np.float64]): Cartesian coordinates.
     
     Returns:
-        npt.NDArray[np.floating]: Spherical coordinates.
+        npt.NDArray[np.float64]: Spherical coordinates.
     
     """
     r_theta_phi = np.empty_like(x_y_z)
@@ -23,17 +23,17 @@ def cartesian_to_spherical_coords(
     return r_theta_phi
 
 def spherical_to_cartesian_coords(
-        r_theta_phi: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        r_theta_phi: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Spherical-to-Cartesian coordinates transformation.
 
     This function transforms spherical coordinates to Cartesian
     coordinates.
 
     Args:
-        r_theta_phi (npt.NDArray[np.floating]): Spherical coordinates.
+        r_theta_phi (npt.NDArray[np.float64]): Spherical coordinates.
     
     Returns:
-        npt.NDArray[np.floating]: Cartesian coordinates.
+        npt.NDArray[np.float64]: Cartesian coordinates.
     
     """
     x_y_z = np.empty_like(r_theta_phi)

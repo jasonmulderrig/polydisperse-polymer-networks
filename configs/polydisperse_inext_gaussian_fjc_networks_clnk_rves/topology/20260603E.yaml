@@ -1,0 +1,43 @@
+n:
+  -
+    - 100.
+    - 100.
+    - 100.
+    - 100.
+  -
+    - 40.
+    - 120.
+    - 120.
+    - 120.
+  -
+    - 10.
+    - 130.
+    - 130.
+    - 130.
+  -
+    - 325.
+    - 25.
+    - 25.
+    - 25.
+  -
+    - 50.
+    - 50.
+    - 150.
+    - 150.
+  -
+    - 25.
+    - 25.
+    - 175.
+    - 175.
+  -
+    - 10.
+    - 10.
+    - 190.
+    - 190.
+n_init: explicit
+b: 1.
+kappa_n: 0.
+zeta_n_char: 0.
+w_c_dist: inext_gaussian_fjc
+w_c_dfrmtn_dist: log_barrier_clnk_vol_pnlty
+type_8_chn_clnk: cube

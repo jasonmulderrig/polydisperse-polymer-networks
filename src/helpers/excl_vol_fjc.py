@@ -3,7 +3,7 @@ import numpy.typing as npt
 
 def w_c_log_barrier_clnk_vol_pnlty_func(
         gamma: npt.ArrayLike,
-        n: float | int) -> npt.ArrayLike:
+        n: float) -> npt.ArrayLike:
     """Nondimensional logarithmic barrier chain-level free energy that
     penalizes chain ends from overlapping in space (and thus penalizes
     excluded volume interactions).
@@ -13,7 +13,7 @@ def w_c_log_barrier_clnk_vol_pnlty_func(
 
     Args:
         gamma (npt.ArrayLike): Absolute/Equilibrium chain stretch.
-        n (float | int): Number of chain segments.
+        n (float): Number of chain segments.
     
     Returns:
         npt.ArrayLike: Nondimensional logarithmic barrier chain-level
