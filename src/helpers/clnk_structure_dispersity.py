@@ -142,30 +142,31 @@ def geometrically_isomorphic_set_clnks_from_clnk_assembly(
         y_clnk_init: npt.NDArray[np.float64],
         X_hat_clnk: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Assemble cross-link structures that are geometrically isomorphic
-    to a single provided cross-link structure.
+    to a provided canonical cross-link structure.
 
     This function generates all possible cross-link structure
-    permutations of a single provided cross-link structure and
+    permutations of a provided canonical cross-link structure and
     determines which cross-link structure permutations are geometrically
-    isomorphic to the provided cross-link structure. Note that this
+    isomorphic to the canonical cross-link structure. Note that this
     sufficiently constitutes the set of cross-link structures that are
-    geometrically isomorphic to the provided cross-link structure.
+    geometrically isomorphic to the canonical cross-link structure.
 
     Args:
-        n_clnk (npt.NDArray[np.float64]): Number of chain segments for each chain in the cross-link structure RVE.
-        y_clnk_init (npt.NDArray[np.float64]): Initial cross-link junction position for the cross-link structure RVE.
-        X_clnk (npt.NDArray[np.float64]): Initial chain end position for each chain in the cross-link structure RVE.
+        n_clnk (npt.NDArray[np.float64]): Number of chain segments for each chain in the provided canonical cross-link structure RVE.
+        y_clnk_init (npt.NDArray[np.float64]): Initial cross-link junction position for the provided canonical cross-link structure RVE.
+        X_clnk (npt.NDArray[np.float64]): Initial chain end position for each chain in the provided canonical cross-link structure RVE.
     
     Returns:
         npt.NDArray[np.float64]: Cross-link structures that are
-        geometrically isomorphic to the provided cross-link structure.
+        geometrically isomorphic to the provided canonical cross-link
+        structure.
     
     """
     # Perform the cross-link chain permutation analysis only if the
-    # provided cross-link structure is polydisperse
+    # provided canonical cross-link structure is polydisperse
     if not np.allclose(n_clnk, np.full_like(n_clnk, n_clnk[0])):
         # Initialize the set of cross-link structures that are
-        # geometrically isomorphic to the provided cross-link structure
+        # geometrically isomorphic to the canonical cross-link structure
         n_clnks_geo_isomrphc_set = np.atleast_2d(n_clnk)
         
         # Initialize a graph to represent the baseline initial unit
@@ -173,7 +174,7 @@ def geometrically_isomorphic_set_clnks_from_clnk_assembly(
         clnk_graph_0 = clnk_graph_func(y_clnk_init, X_hat_clnk)
 
         # Initialize a graph (on top of the baseline initial unit
-        # cross-link structure) that represents the provided cross-link
+        # cross-link structure) that represents the canonical cross-link
         # structure
         clnk_geo_isomrphc_set_graph = (
             clnk_graph_add_edges_and_n_edge_attribute_func(
@@ -186,12 +187,11 @@ def geometrically_isomorphic_set_clnks_from_clnk_assembly(
             n_clnk[indcs_permutations(np.shape(n_clnk)[0])], axis=0)
         
         # Determine which permuted cross-link structures are
-        # geometrically isomorphic to the provided cross-link
-        # structure
+        # geometrically isomorphic to the canonical cross-link structure
         for prmttn in range(np.shape(n_clnk_permutations)[0]):
             n_clnk_prmttn = n_clnk_permutations[prmttn]
             # Only assess permuted cross-link structures that are
-            # distinct from the provided cross-link structure
+            # distinct from the canonical cross-link structure
             if np.allclose(n_clnk, n_clnk_prmttn): continue
             else:
                 # Initialize a graph (on top of the baseline initial
@@ -203,7 +203,7 @@ def geometrically_isomorphic_set_clnks_from_clnk_assembly(
                 )
 
                 # Test if the unique permuted cross-link structure is
-                # geometrically isomorphic to the provided cross-link
+                # geometrically isomorphic to the canonical cross-link
                 # structure; if true, then add the it to the set
                 if is_geometrically_isomorphic(clnk_geo_isomrphc_set_graph, clnk_prmttn_graph):
                     n_clnks_geo_isomrphc_set = np.vstack(
@@ -237,8 +237,9 @@ def geometrically_isomorphic_set_clnks_from_clnks_assembly(
     """
     # Initialize lists to segregate all cross-link structures into
     # separate geometrically isomorphic sets, and populate these lists
-    # with the first cross-link structure and its associated probability
-    # of occurance to instantiate the first geometrically isomorphic set
+    # with the first (now canonical) cross-link structure and its
+    # associated probability of occurance to instantiate the first
+    # geometrically isomorphic set
     n_clnks = np.atleast_2d(n_clnks)
     p_n_k_clnks = np.atleast_1d(p_n_k_clnks)
     num_clnks = np.shape(n_clnks)[0]
@@ -271,9 +272,9 @@ def geometrically_isomorphic_set_clnks_from_clnks_assembly(
             # cross-link structures
             for geo_isomrphc_set_indx in range(len(n_clnks_geo_isomrphc_sets)):
                 # Initialize graphs (on top of the baseline initial unit
-                # cross-link structure) that represent the leading
-                # geometrically isomorphic cross-link structure and the
-                # extracted cross-link structure
+                # cross-link structure) that represent the canonical
+                # cross-link structure and the extracted cross-link
+                # structure
                 clnk_geo_isomrphc_set_graph = (
                     clnk_graph_add_edges_and_n_edge_attribute_func(
                         clnk_graph_0.copy(),
@@ -310,13 +311,13 @@ def geometrically_isomorphic_set_clnks_symmetric_under_chain_permutation_assembl
         n: npt.NDArray[np.float64],
         p_n: npt.NDArray[np.float64],
         X_hat_clnk: npt.NDArray[np.float64]) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """Assemble representative cross-link structures and their
-    associated probability distributions in the case where all
-    permutations of chains in the cross-link structure belong to the
-    same geometrically isomorphic set (and thus, there is symmetry
-    equivalence under chain permutation).
+    """Assemble canonical cross-link structures and their associated
+    probability distributions in the case where all permutations of
+    chains in the cross-link structure belong to the same geometrically
+    isomorphic set (and thus, there is symmetry equivalence under chain
+    permutation).
 
-    This function generates representative cross-link structures and
+    This function generates canonical cross-link structures and
     calculates the associated probability distribution for each such
     cross-link structure in the case where all permutations of chains in
     the cross-link structure belong to the same geometrically isomorphic
@@ -333,11 +334,11 @@ def geometrically_isomorphic_set_clnks_symmetric_under_chain_permutation_assembl
     
     Returns:
         tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-        Representative cross-link structures and their associated
-        probability distributions in the case where all permutations of
-        chains in the cross-link structure belong to the same
-        geometrically isomorphic set (and thus, there is symmetry
-        equivalence under chain permutation).
+        Canonical cross-link structures and their associated probability
+        distributions in the case where all permutations of chains in
+        the cross-link structure belong to the same geometrically
+        isomorphic set (and thus, there is symmetry equivalence under
+        chain permutation).
     
     """
     # Initialize parameters
@@ -385,8 +386,8 @@ def geometrically_isomorphic_set_clnks_symmetric_under_chain_permutation_assembl
         )
         raise ValueError(error_str)
     
-    # Deduce and return the representative cross-link structures and
-    # their associated probabilities of occurance
+    # Deduce and return the canonical cross-link structures and their
+    # associated probabilities of occurance
     m_clnks = m_clnks_symmetric_under_chain_permutation_func(k, N)
     n_clnks = n_clnks_symmetric_under_chain_permutation_func(n, m_clnks)
     p_n_k_clnks = p_n_k_clnks_symmetric_under_chain_permutation_func(
@@ -398,7 +399,7 @@ def geometrically_isomorphic_sets_clnks_assembly(
         p_n: npt.NDArray[np.float64],
         k: npt.NDArray[np.int64],
         X_hat_clnks: list[npt.NDArray[np.float64]],
-        consolidate_geo_isomrphc_set: bool = False) -> tuple[list[list[npt.NDArray[np.float64]]], list[list[npt.NDArray[np.float64]]]] | tuple[list[npt.NDArray[np.float64]], list[npt.NDArray[np.float64]]]:
+        canonize_geo_isomrphc_set: bool = False) -> tuple[list[list[npt.NDArray[np.float64]]], list[list[npt.NDArray[np.float64]]]] | tuple[list[npt.NDArray[np.float64]], list[npt.NDArray[np.float64]]]:
     """Assemble geometrically isomorphic cross-link structures and their
     associated probability distributions.
 
@@ -409,15 +410,15 @@ def geometrically_isomorphic_sets_clnks_assembly(
     numbers, and the degree of the cross-link structures. Then, the
     cross-link structures are segregated into separate geometrically
     isomorphic sets. If desired, each of these geometrically isomorphic
-    sets of cross-link structures can be consolidated by returning the
-    leading cross-link structure from the set (as a set representative).
+    sets of cross-link structures can be canonized by returning each
+    canonical cross-link structure.
 
     Args:
         n (npt.NDArray[np.float64]): Salient chain segment numbers.
         p_n (npt.NDArray[np.float64]): Polymer chain segment number probability distribution.
         k (npt.NDArray[np.int64]): Degree of all cross-links.
         X_hat_clnks (list[npt.NDArray[np.float64]]): Initial unit chain end position for each chain in each of the initial cross-link structure RVEs.
-        consolidate_geo_isomrphc_set (bool): Boolean indicating if the geometrically isomorphic sets of cross-link structures ought to be consolidated (if True) or left as is (if False). Default is False.
+        canonize_geo_isomrphc_set (bool): Boolean indicating if the geometrically isomorphic sets of cross-link structures ought to be canonized (if True) or left as is (if False). Default is False.
     
     Returns:
         tuple[list[list[npt.NDArray[np.float64]]], list[list[npt.NDArray[np.float64]]]] | tuple[list[npt.NDArray[np.float64]], list[npt.NDArray[np.float64]]]:
@@ -507,18 +508,19 @@ def geometrically_isomorphic_sets_clnks_assembly(
             # Gather the unit cross-link chain end positions
             X_hat_clnk = X_hat_clnks[k_indx]
 
-            # If applicable, construct the cross-link structures and
-            # their associated probabilities of occurance for the case
-            # where all permutations of chains in the cross-link
-            # structure belong to the same geometrically isomorphic set
-            if consolidate_geo_isomrphc_set and k[k_indx] == 3:
+            # If applicable, construct the canonical cross-link
+            # structures and their associated probabilities of occurance
+            # for the case where all permutations of chains in the
+            # cross-link structure belong to the same geometrically
+            # isomorphic set
+            if canonize_geo_isomrphc_set and k[k_indx] == 3:
                 if np.allclose(X_hat_clnk, amended_3_chn_clnk_X_hat_clnk):
                     k_3_n_clnks_symmtry_prmttn_geo_isomrphc_set = True
                     n_clnks_k_vals, p_n_k_clnks_k_vals = (
                         geometrically_isomorphic_set_clnks_symmetric_under_chain_permutation_assembly(
                             n, p_n, X_hat_clnk)
                     )
-            elif consolidate_geo_isomrphc_set and k[k_indx] == 4:
+            elif canonize_geo_isomrphc_set and k[k_indx] == 4:
                 if np.allclose(X_hat_clnk, regular_tetrahedral_4_chn_clnk_X_hat_clnk):
                     k_4_n_clnks_symmtry_prmttn_geo_isomrphc_set = True
                     n_clnks_k_vals, p_n_k_clnks_k_vals = (
@@ -551,30 +553,30 @@ def geometrically_isomorphic_sets_clnks_assembly(
             n_clnks.append(n_clnks_k_vals)
             p_n_k_clnks.append(p_n_k_clnks_k_vals)
     
-    # If called for, consolidate the sets of geometrically isomorphic
-    # cross-link structures together by retaining the leading cross-link
-    # structure from each set and summing the cross-link structure
-    # probabilities within each set together
-    if consolidate_geo_isomrphc_set:
-        # Consolidate the sets of geometrically isomorphic cross-link
+    # If called for, canonize the sets of geometrically isomorphic
+    # cross-link structures together by retaining the canonical
+    # cross-link structure from each set and summing the cross-link
+    # structure probabilities within each set together
+    if canonize_geo_isomrphc_set:
+        # Canonize the sets of geometrically isomorphic cross-link
         # structures together for each cross-link degree
         for k_indx in range(k_num):
             if ((k[k_indx] == 3 and k_3_n_clnks_symmtry_prmttn_geo_isomrphc_set) or
                 (k[k_indx] == 4 and k_4_n_clnks_symmtry_prmttn_geo_isomrphc_set)):
                 continue
             else:
-                # Initialize consolidated cross-link structure arrays
+                # Initialize canonized cross-link structure arrays
                 num_geo_isomrphc_sets = len(n_clnks[k_indx])
                 n_clnks_k_vals = np.empty_like(
                     n, shape=(num_geo_isomrphc_sets, k[k_indx]))
                 p_n_k_clnks_k_vals = np.empty_like(
                     p_n, shape=(num_geo_isomrphc_sets,))
                 
-                # Consolidate each set of geometrically isomorphic
+                # Canonize each set of geometrically isomorphic
                 # cross-link structures together by retaining the
-                # leading cross-link structure from each set and summing
-                # the cross-link structure probabilities within each set
-                # together
+                # canonical cross-link structure from each set and
+                # summing the cross-link structure probabilities within
+                # each set together
                 for geo_isomrphc_set_indx in range(num_geo_isomrphc_sets):
                     n_clnks_k_vals[geo_isomrphc_set_indx] = (
                         n_clnks[k_indx][geo_isomrphc_set_indx][0]
@@ -584,7 +586,7 @@ def geometrically_isomorphic_sets_clnks_assembly(
                 
                 # Update the lists representing the geometrically
                 # isomorphic sets of cross-link structures with this
-                # consolidated format
+                # canonized format
                 n_clnks[k_indx] = n_clnks_k_vals
                 p_n_k_clnks[k_indx] = p_n_k_clnks_k_vals
     
@@ -593,19 +595,19 @@ def geometrically_isomorphic_sets_clnks_assembly(
 def p_clnks_init_func(
         p_k_clnks: npt.NDArray[np.float64],
         p_n_k_clnks: list[npt.NDArray[np.float64]] | list[list[npt.NDArray[np.float64]]]) -> list[npt.NDArray[np.float64]] | list[list[npt.NDArray[np.float64]]]:
-    """Probability distribution of distinct elastically-effective
+    """Probability distribution of canonical elastically-effective
     cross-link structures with degree k.
 
-    This function calculates the probability distribution of distinct
+    This function calculates the probability distribution of canonical
     elastically-effective cross-link structures with degree k.
 
     Args:
         p_k_clnks (npt.NDArray[np.float64]): Probability distribution of elastically-effective cross-linkers with degree k.
-        p_n_k_clnks (list[npt.NDArray[np.float64]] | list[list[npt.NDArray[np.float64]]]): Probability distribution of distinct (elastically-effective) cross-link structures with degree k.
+        p_n_k_clnks (list[npt.NDArray[np.float64]] | list[list[npt.NDArray[np.float64]]]): Probability distribution of canonical (elastically-effective) cross-link structures with degree k.
     
     Returns:
         list[npt.NDArray[np.float64]] | list[list[npt.NDArray[np.float64]]]:
-        Probability distribution of distinct elastically-effective
+        Probability distribution of canonical elastically-effective
         cross-link structures with degree k.
     
     """
@@ -631,7 +633,7 @@ def p_clnks_init_func(
             p_clnks.append(p_clnks_k_vals)
     else:
         error_str = (
-            "The probability distribution of distinct cross-link "
+            "The probability distribution of canonical cross-link "
             + "structures with degree k is not provided in the correct "
             + "type of either list[npt.NDArray[np.float64]] or "
             + "list[list[npt.NDArray[np.float64]]]."
@@ -642,11 +644,11 @@ def p_clnks_init_func(
 def m_clnks_symmetric_under_chain_permutation_func(
         k: int,
         N: int) -> npt.NDArray[np.int64]:
-    """Chain segment number multiplicity for each distinct cross-link
+    """Chain segment number multiplicity for each canonical cross-link
     structure (with symmetry equivalence under chain permutation).
 
     This function computes the chain segment number multiplicity for
-    each distinct cross-link structure (with symmetry equivalence under
+    each canonical cross-link structure (with symmetry equivalence under
     chain permutation).
 
     Args:
@@ -655,7 +657,7 @@ def m_clnks_symmetric_under_chain_permutation_func(
     
     Returns:
         npt.NDArray[np.int64]: Chain segment number multiplicity for
-        each distinct cross-link structure (with symmetry equivalence
+        each canonical cross-link structure (with symmetry equivalence
         under chain permutation).
     
     """
@@ -664,22 +666,22 @@ def m_clnks_symmetric_under_chain_permutation_func(
 def n_clnks_symmetric_under_chain_permutation_func(
         n: npt.NDArray[np.float64],
         m_clnks: npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
-    """Chain segment number for each chain in each distinct cross-link
+    """Chain segment number for each chain in each canonical cross-link
     structure (with symmetry equivalence under chain permutation).
 
     This function tabulates the chain segment number for each chain in
-    each distinct cross-link structure (with symmetry equivalence under
+    each canonical cross-link structure (with symmetry equivalence under
     chain permutation).
 
     Args:
         n (npt.NDArray[np.float64]): Salient chain segment numbers (sorted from least to greatest).
-        m_clnks (npt.NDArray[np.int64]): Chain segment number multiplicity for each distinct cross-link structure (with symmetry equivalence under chain permutation).
+        m_clnks (npt.NDArray[np.int64]): Chain segment number multiplicity for each canonical cross-link structure (with symmetry equivalence under chain permutation).
     
     Returns:
-        npt.NDArray[np.float64]: Chain segment number for
-        each chain in each distinct cross-link structure (with symmetry
-        equivalence under chain permutation) (sorted from least to
-        greatest for each cross-link structure).
+        npt.NDArray[np.float64]: Chain segment number for each chain in
+        each canonical cross-link structure (with symmetry equivalence
+        under chain permutation) (sorted from least to greatest for each
+        cross-link structure).
     
     """
     # Boilerplate checks
@@ -695,19 +697,19 @@ def n_clnks_symmetric_under_chain_permutation_func(
 
 def C_clnks_symmetric_under_chain_permutation_func(
         m_clnks: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
-    """Number of permutations that exist for each distinct cross-link
+    """Number of permutations that exist for each canonical cross-link
     structure due to symmetry equivalence under chain permutation.
 
     This function calculates the number of permutations that exist for
-    each distinct cross-link structure due to symmetry equivalence under
-    chain permutation.
+    each canonical cross-link structure due to symmetry equivalence
+    under chain permutation.
 
     Args:
-        m_clnks (npt.NDArray[np.int64]): Chain segment number multiplicity for each distinct cross-link structure (with symmetry equivalence under chain permutation).
+        m_clnks (npt.NDArray[np.int64]): Chain segment number multiplicity for each canonical cross-link structure (with symmetry equivalence under chain permutation).
     
     Returns:
         npt.NDArray[np.int64]: Number of permutations that exist for
-        each distinct cross-link structure due to symmetry equivalence
+        each canonical cross-link structure due to symmetry equivalence
         under chain permutation.
     
     """
@@ -717,20 +719,20 @@ def p_n_k_clnks_symmetric_under_chain_permutation_func(
         C_clnks: npt.NDArray[np.int64],
         p_n: npt.NDArray[np.float64],
         m_clnks: npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
-    """Probability distribution of distinct cross-link structures (with
+    """Probability distribution of canonical cross-link structures (with
     symmetry equivalence under chain permutation) with degree k.
 
-    This function calculates the probability distribution of distinct
+    This function calculates the probability distribution of canonical
     cross-link structures (with symmetry equivalence under chain
     permutation) with degree k.
 
     Args:
-        C_clnks: (npt.NDArray[np.int64]): Number of permutations that exist for each distinct cross-link structure due to symmetry equivalence under chain permutation.
+        C_clnks: (npt.NDArray[np.int64]): Number of permutations that exist for each canonical cross-link structure due to symmetry equivalence under chain permutation.
         p_n (npt.NDArray[np.float64]): Polymer chain segment number probability distribution.
-        m_clnks: (npt.NDArray[np.int64]): Chain segment number multiplicity for each distinct cross-link structure (with symmetry equivalence under chain permutation).
+        m_clnks: (npt.NDArray[np.int64]): Chain segment number multiplicity for each canonical cross-link structure (with symmetry equivalence under chain permutation).
     
     Returns:
-        npt.NDArray[np.float64]: Probability distribution of distinct
+        npt.NDArray[np.float64]: Probability distribution of canonical
         cross-link structures (with symmetry equivalence under chain
         permutation) with degree k.
     

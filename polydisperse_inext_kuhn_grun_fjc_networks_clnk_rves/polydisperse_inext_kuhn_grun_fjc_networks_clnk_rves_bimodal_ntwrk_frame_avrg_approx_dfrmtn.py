@@ -93,8 +93,8 @@ def main(cfg: DictConfig) -> None:
         raise ValueError(error_str)
 
     # Initialize the chain segment number for each chain in each
-    # distinct cross-link structure and the probability distribution of
-    # distinct cross-link structures (with symmetry equivalence)
+    # canonical cross-link structure and the probability distribution of
+    # canonical cross-link structures (with symmetry equivalence)
     num_p_n_args = len(cfg.topology.p_n_args)
     p = np.empty(num_p_n_args)
     p_clnks = []
@@ -145,7 +145,7 @@ def main(cfg: DictConfig) -> None:
     # Extract the nondimensional polymer chain free energy function and
     # the nondimensional first and second derivatives of the polymer
     # chain free energy with respect to the cross-link junction position
-    # functionfor each chain
+    # function for each chain
     w_c_func_clnks = np.empty_like(n_clnks, dtype=object)
     w_c_args_clnks = np.empty_like(n_clnks, dtype=object)
     dw_c__dy_clnk_func_clnks = np.empty_like(n_clnks, dtype=object)

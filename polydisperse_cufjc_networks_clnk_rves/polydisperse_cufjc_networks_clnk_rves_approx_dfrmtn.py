@@ -103,7 +103,7 @@ def main(cfg: DictConfig) -> None:
     # Extract the nondimensional polymer chain free energy function and
     # the nondimensional first and second derivatives of the polymer
     # chain free energy with respect to the cross-link junction position
-    # functionfor each chain
+    # function for each chain
     w_c_func_clnks = np.empty_like(n_clnks, dtype=object)
     w_c_args_clnks = np.empty_like(n_clnks, dtype=object)
     dw_c__dy_clnk_func_clnks = np.empty_like(n_clnks, dtype=object)
